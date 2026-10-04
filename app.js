@@ -1,33 +1,135 @@
 const SUPABASE_URL="https://mmqawrbkirthcfxbjehp.supabase.co";
 const SUPABASE_KEY="sb_publishable_IhVAMfcAeNI4-aiIn5fm2w_vY9tnfVD";
 const BUCKET="waqas";
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $=id=>document.getElementById(id);let files=[];let signUpMode=false;let currentExcel=null,currentExcelName="",currentSheetIndex=0;
-function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove("show"),3000)}
-function bytes(n){if(!n)return"0 B";const u=["B","KB","MB","GB"];const i=Math.min(3,Math.floor(Math.log(n)/Math.log(1024)));return`${(n/1024**i).toFixed(i?1:0)} ${u[i]}`}
-function ext(n){return(n.split(".").pop()||"").toLowerCase()}function isExcel(n){return["xlsx","xls","csv"].includes(ext(n))}
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function icon(n){const e=ext(n);if(isExcel(n))return"X";if(["jpg","jpeg","png","gif","webp"].includes(e))return"▧";if(e==="pdf")return"P";if(["zip","rar","7z"].includes(e))return"Z";return"◫"}
-function showApp(user){$("authView").hidden=true;$("appView").hidden=false;$("userEmail").textContent=user?.email||"";loadFiles()}
-function showAuth(){$("authView").hidden=false;$("appView").hidden=true}
-$("toggleAuth").onclick=()=>{signUpMode=!signUpMode;$("authBtn").textContent=signUpMode?"Create account":"Sign in";$("toggleAuth").textContent=signUpMode?"Already have an account? Sign in":"Create a new account";$("authMsg").textContent=""};
-$("authForm").onsubmit=async e=>{e.preventDefault();$("authMsg").textContent="Working…";const email=$("email").value.trim(),password=$("password").value;const r=signUpMode?await db.auth.signUp({email,password}):await db.auth.signInWithPassword({email,password});if(r.error){$("authMsg").textContent=r.error.message;return}if(signUpMode&&!r.data.session){$("authMsg").textContent="Account created. Check your email, then sign in.";return}showApp(r.data.user)};
-$("logoutBtn").onclick=async()=>{await db.auth.signOut();showAuth();toast("Logged out")};
-async function uploadFiles(list){if(!list.length)return;for(const file of list){$("statusText").textContent=`Uploading ${file.name}…`;const {error}=await db.storage.from(BUCKET).upload(file.name,file,{upsert:true,contentType:file.type||"application/octet-stream"});if(error)toast(`Upload failed: ${error.message}`);else toast(`${file.name} uploaded`)}$("fileInput").value="";await loadFiles()}
-$("fileInput").onchange=e=>uploadFiles([...e.target.files]);$("mobileUpload").onclick=()=>$("fileInput").click();
-async function loadFiles(){const {data,error}=await db.storage.from(BUCKET).list("",{limit:1000,sortBy:{column:"name",order:"asc"}});if(error){$("statusText").textContent=error.message;toast("Could not load files");return}files=(data||[]).filter(x=>x.name);renderFiles()}
-function renderFiles(){const q=$("searchInput").value.toLowerCase().trim();const mode=document.querySelector(".nav-item.active")?.dataset.page||"files";let list=files.filter(f=>f.name.toLowerCase().includes(q));if(mode==="recent")list=[...list].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));if(mode==="starred")list=[];$("sectionTitle").textContent=mode==="recent"?"Recent files":mode==="starred"?"Starred files":"All files";$("fileCount").textContent=files.length;const total=files.reduce((s,f)=>s+(Number(f.metadata?.size)||0),0);$("storageUsed").textContent=bytes(total);$("sideStorage").textContent=bytes(total);$("excelCount").textContent=files.filter(f=>isExcel(f.name)).length;$("sideFileCount").textContent=`${files.length} file${files.length===1?"":"s"}`;$("storageBar").style.width=Math.min(100,total/(100*1024*1024)*100)+"%";$("statusText").textContent=`${list.length} shown · ${files.length} total`;$("fileList").innerHTML="";$("emptyState").hidden=list.length!==0;if(mode==="starred"){$("emptyState").hidden=false;$("emptyState").querySelector("b").textContent="No starred files yet"}list.forEach(f=>{const row=document.createElement("div");row.className="file-row";row.innerHTML=`<div class="file-main"><div class="file-icon">${icon(f.name)}</div><div style="min-width:0"><div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div><div class="file-meta">${bytes(Number(f.metadata?.size)||0)} · ${f.updated_at?new Date(f.updated_at).toLocaleDateString():""}</div></div></div><div class="file-actions"><button class="ghost" data-a="open" ${isExcel(f.name)?"":"disabled"}>${isExcel(f.name)?"Open":"Open"}</button><button class="ghost" data-a="download">Download</button><button class="ghost" data-a="delete">Delete</button></div>`;row.querySelector('[data-a="open"]').onclick=()=>openExcel(f.name);row.querySelector('[data-a="download"]').onclick=()=>downloadFile(f.name);row.querySelector('[data-a="delete"]').onclick=()=>deleteFile(f.name);$("fileList").appendChild(row)})}
-$("searchInput").oninput=renderFiles;document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderFiles()});
-async function downloadFile(name){const {data,error}=await db.storage.from(BUCKET).download(name);if(error){toast(`Download failed: ${error.message}`);return}const u=URL.createObjectURL(data),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-async function deleteFile(name){if(!confirm(`Delete "${name}"?`))return;const {error}=await db.storage.from(BUCKET).remove([name]);if(error)toast(`Delete failed: ${error.message}`);else{toast(`${name} deleted`);loadFiles()}}
-const dz=$("dropZone");["dragenter","dragover"].forEach(e=>dz.addEventListener(e,x=>{x.preventDefault();dz.classList.add("drag")}));["dragleave","drop"].forEach(e=>dz.addEventListener(e,x=>{x.preventDefault();dz.classList.remove("drag")}));dz.addEventListener("drop",e=>uploadFiles([...e.dataTransfer.files]));dz.addEventListener("click",()=>$("fileInput").click());
-async function openExcel(name){if(!isExcel(name))return;$("excelModal").hidden=false;$("editorFileName").textContent=name;$("editorStatus").textContent="Opening Excel file…";$("excelTable").innerHTML='<tr><td style="padding:30px">Loading…</td></tr>';try{if(typeof XLSX==="undefined")throw new Error("Excel editor library did not load. Refresh the page and try again.");const {data,error}=await db.storage.from(BUCKET).download(name);if(error)throw error;const buffer=await data.arrayBuffer();currentExcel=XLSX.read(buffer,{type:"array",cellFormula:true,cellStyles:true});currentExcelName=name;currentSheetIndex=0;renderSheetTabs();renderExcelSheet();$("editorStatus").textContent=`${currentExcel.SheetNames.length} sheet${currentExcel.SheetNames.length===1?"":"s"} · Ready to edit`;}catch(err){console.error(err);$("excelModal").hidden=true;toast(`Excel open failed: ${err.message||err}`)}}
-function renderSheetTabs(){const box=$("sheetTabs");box.innerHTML="";currentExcel.SheetNames.forEach((name,i)=>{const b=document.createElement("button");b.textContent=name;b.className=i===currentSheetIndex?"active":"";b.onclick=()=>{captureSheet();currentSheetIndex=i;renderSheetTabs();renderExcelSheet()};box.appendChild(b)})}
-function matrix(ws){const range=XLSX.utils.decode_range(ws["!ref"]||"A1:A1"),rows=[];for(let r=range.s.r;r<=range.e.r;r++){const row=[];for(let c=range.s.c;c<=range.e.c;c++){const cell=ws[XLSX.utils.encode_cell({r,c})];row.push(cell?(cell.f?`=${cell.f}`:(cell.v??"")):"")}rows.push(row)}return rows}
-function renderExcelSheet(){const ws=currentExcel.Sheets[currentExcel.SheetNames[currentSheetIndex]],data=matrix(ws),table=$("excelTable");table.innerHTML="";const cols=Math.max(1,...data.map(r=>r.length));data.forEach((row,r)=>{const tr=document.createElement("tr"),th=document.createElement("th");th.className="row-number";th.textContent=r+1;tr.appendChild(th);for(let c=0;c<cols;c++){const td=document.createElement("td");td.contentEditable="true";td.spellcheck=false;td.dataset.r=r;td.dataset.c=c;td.textContent=row[c]??"";td.addEventListener("focus",()=>$("cellHint").textContent=`Cell ${XLSX.utils.encode_cell({r,c})}`);tr.appendChild(td)}table.appendChild(tr)});if(!data.length)table.innerHTML='<tr><td>Empty sheet</td></tr>'}
-function captureSheet(){if(!currentExcel)return;const table=$("excelTable"),aoa=[];for(let r=0;r<table.rows.length;r++){const row=[];for(let c=1;c<table.rows[r].cells.length;c++)row.push(table.rows[r].cells[c].textContent);aoa.push(row)}const ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=Array(Math.max(1,...aoa.map(r=>r.length))).fill({wch:18});currentExcel.Sheets[currentExcel.SheetNames[currentSheetIndex]]=ws}
-function makeBlob(){captureSheet();const out=XLSX.write(currentExcel,{bookType:"xlsx",type:"array"});return new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
-$("saveExcelBtn").onclick=async()=>{if(!currentExcel)return;try{$("editorStatus").textContent="Saving to cloud…";const blob=makeBlob();const {error}=await db.storage.from(BUCKET).upload(currentExcelName,blob,{upsert:true,contentType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});if(error)throw error;$("editorStatus").textContent="Saved to cloud ✓";toast("Excel saved successfully");await loadFiles()}catch(e){$("editorStatus").textContent="Save failed";toast(`Save failed: ${e.message||e}`)}};
-$("downloadExcelBtn").onclick=()=>{if(!currentExcel)return;try{const blob=makeBlob(),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=currentExcelName.replace(/\.(xls|csv)$/i,"")+".xlsx";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);toast("Excel downloaded")}catch(e){toast(`Download failed: ${e.message||e}`)}};
-$("closeExcelBtn").onclick=()=>{$("excelModal").hidden=true;currentExcel=null;currentExcelName=""};$("excelModal").addEventListener("click",e=>{if(e.target===$("excelModal"))$("closeExcelBtn").click()});
-db.auth.getSession().then(({data})=>data.session?showApp(data.session.user):showAuth());db.auth.onAuthStateChange((_e,s)=>s?showApp(s.user):showAuth());
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+let user=null, files=[], mode="login", currentView="overview", currentWorkbook=null, currentSheet=0, currentFile=null;
+
+const $=id=>document.getElementById(id);
+const toast=(msg,bad=false)=>{const d=document.createElement("div");d.className="toast"+(bad?" bad":"");d.textContent=msg;$("toast").appendChild(d);setTimeout(()=>d.remove(),3000)};
+const fmt=n=>{if(!n)return"0 B";const u=["B","KB","MB","GB"];let i=0;while(n>=1024&&i<3){n/=1024;i++}return n.toFixed(i?1:0)+" "+u[i]};
+const icon=f=>{const e=f.name.split(".").pop().toLowerCase();return e==="xlsx"||e==="xls"?"▦":e==="pdf"?"◫":["png","jpg","jpeg","webp"].includes(e)?"▧":e==="doc"||e==="docx"?"▤":"•"};
+const isExcel=f=>/\.(xlsx|xls)$/i.test(f.name);
+
+async function init(){
+  const {data:{session}}=await db.auth.getSession();
+  if(session){user=session.user;showApp();await loadFiles()}
+  db.auth.onAuthStateChange((_e,s)=>{if(s){user=s.user;showApp();loadFiles()}else{user=null;$("app").classList.add("hidden");$("auth").classList.remove("hidden")}});
+}
+function showApp(){ $("auth").classList.add("hidden");$("app").classList.remove("hidden");$("userEmail").textContent=user.email||"User";$("avatar").textContent=(user.email||"W")[0].toUpperCase() }
+async function auth(e){
+ e.preventDefault();$("authMsg").textContent="Working...";
+ const email=$("email").value.trim(),password=$("password").value;
+ let r=mode==="login"?await db.auth.signInWithPassword({email,password}):await db.auth.signUp({email,password});
+ if(r.error){$("authMsg").textContent=r.error.message;return}
+ $("authMsg").textContent=mode==="login"?"Signed in.":"Account created. Check email if confirmation is enabled.";
+ if(r.data.session){user=r.data.session.user;showApp();loadFiles()}
+}
+async function loadFiles(){
+ if(!user)return;
+ const {data,error}=await db.storage.from(BUCKET).list("",{limit:100,sortBy:{column:"created_at",order:"desc"}});
+ if(error){toast(error.message,true);return}
+ files=(data||[]).filter(x=>x.name&&!x.name.endsWith("/"));
+ render();updateStats();
+}
+function updateStats(){
+ const total=files.reduce((a,f)=>a+(f.metadata?.size||f.metadata?.size_bytes||0),0);
+ $("fileCount").textContent=files.length;$("used").textContent=fmt(total);$("sideUsed").textContent=fmt(total);
+ const pct=Math.min(100,total/(5*1024**3)*100);$("sidePct").textContent=Math.round(pct)+"%";$("sideProgress").style.width=pct+"%";
+ $("docCount").textContent=files.filter(f=>/\.(pdf|doc|docx|txt)$/i.test(f.name)).length;
+ $("sheetCount").textContent=files.filter(isExcel).length;$("recentCount").textContent=Math.min(5,files.length);
+}
+function render(){
+ const q=$("search").value.toLowerCase().trim();
+ let list=files.filter(f=>f.name.toLowerCase().includes(q));
+ if(currentView==="starred") list=list.filter(f=>localStorage.getItem("star_"+f.name)==="1");
+ if(currentView==="recent") list=list.slice(0,8);
+ $("fileGrid").innerHTML="";
+ $("empty").classList.toggle("hidden",list.length>0);
+ list.forEach(f=>{
+   const c=document.createElement("div");c.className="file-card glass";
+   const star=localStorage.getItem("star_"+f.name)==="1";
+   c.innerHTML=`<div class="file-top"><div class="file-icon">${icon(f)}</div><button class="file-menu star" title="Star">${star?"★":"☆"}</button></div><div class="file-name" title="${f.name}">${f.name}</div><div class="file-meta">${fmt(f.metadata?.size||f.metadata?.size_bytes||0)} · ${f.created_at?new Date(f.created_at).toLocaleDateString():"Cloud"}</div><div class="file-actions">${isExcel(f)?'<button class="open">Open Excel</button>': '<button class="open">Preview</button>'}<button class="download">Download</button><button class="delete">Delete</button></div>`;
+   c.querySelector(".star").onclick=e=>{e.stopPropagation();localStorage.setItem("star_"+f.name,star?"0":"1");render()};
+   c.querySelector(".open").onclick=e=>{e.stopPropagation();isExcel(f)?openExcel(f):downloadFile(f)};
+   c.querySelector(".download").onclick=e=>{e.stopPropagation();downloadFile(f)};
+   c.querySelector(".delete").onclick=e=>{e.stopPropagation();deleteFile(f)};
+   $("fileGrid").appendChild(c);
+ });
+}
+async function downloadFile(f){
+ const {data,error}=await db.storage.from(BUCKET).download(f.name);
+ if(error){toast(error.message,true);return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(data);a.download=f.name;a.click();URL.revokeObjectURL(a.href);
+}
+async function deleteFile(f){
+ if(!confirm("Delete "+f.name+"?"))return;
+ const {error}=await db.storage.from(BUCKET).remove([f.name]);
+ if(error)toast(error.message,true);else{toast("File deleted");await loadFiles()}
+}
+function triggerUpload(){$("fileInput").click()}
+async function uploadFiles(list){
+ if(!user||!list?.length)return;
+ for(const f of list){
+   const {error}=await db.storage.from(BUCKET).upload(f.name,f,{upsert:true});
+   if(error)toast(f.name+": "+error.message,true);else toast(f.name+" uploaded");
+ }
+ await loadFiles()
+}
+async function openExcel(f){
+ $("editor").classList.remove("hidden");$("editorName").textContent=f.name;$("editorStatus").textContent="Loading...";
+ const {data,error}=await db.storage.from(BUCKET).download(f.name);
+ if(error){toast(error.message,true);$("editor").classList.add("hidden");return}
+ try{
+   const buf=await data.arrayBuffer();currentWorkbook=XLSX.read(buf,{type:"array",cellFormula:true});currentFile=f;currentSheet=0;
+   renderSheets();renderSheet();$("editorStatus").textContent="Ready to edit";
+ }catch(e){toast("Could not read this Excel file",true);$("editor").classList.add("hidden")}
+}
+function renderSheets(){
+ $("sheetTabs").innerHTML="";
+ currentWorkbook.SheetNames.forEach((n,i)=>{const b=document.createElement("button");b.textContent=n;b.className=i===currentSheet?"active":"";b.onclick=()=>{currentSheet=i;renderSheets();renderSheet()};$("sheetTabs").appendChild(b)})
+}
+function renderSheet(){
+ const ws=currentWorkbook.Sheets[currentWorkbook.SheetNames[currentSheet]];
+ const range=XLSX.utils.decode_range(ws["!ref"]||"A1:A1");let html="<table><thead><tr><th>#</th>";
+ for(let c=range.s.c;c<=range.e.c;c++)html+=`<th>${XLSX.utils.encode_col(c)}</th>`;
+ html+="</tr></thead><tbody>";
+ for(let r=range.s.r;r<=range.e.r;r++){
+   html+=`<tr><td>${r+1}</td>`;
+   for(let c=range.s.c;c<=range.e.c;c++){
+     const addr=XLSX.utils.encode_cell({r,c}),cell=ws[addr],val=cell?.v??"";
+     html+=`<td contenteditable="true" data-r="${r}" data-c="${c}" data-a="${addr}">${escapeHtml(String(val))}</td>`;
+   } html+="</tr>"
+ }
+ html+="</tbody></table>";$("sheetArea").innerHTML=html;
+ $("sheetArea").querySelectorAll("td[data-a]").forEach(td=>{
+   td.addEventListener("focus",()=>{$("cellRef").textContent=td.dataset.a;$("formula").value=td.textContent});
+   td.addEventListener("input",()=>{$("formula").value=td.textContent});
+ });
+ $("formula").oninput=()=>{const td=document.querySelector(`td[data-a="${$("cellRef").textContent}"]`);if(td){td.textContent=$("formula").value;td.dispatchEvent(new Event("input"))}}
+}
+const escapeHtml=s=>s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+async function saveExcel(){
+ if(!currentWorkbook||!currentFile)return;
+ const ws=currentWorkbook.Sheets[currentWorkbook.SheetNames[currentSheet]];
+ $("sheetArea").querySelectorAll("td[data-a]").forEach(td=>{
+   const addr=td.dataset.a,v=td.textContent;
+   if(!ws[addr])ws[addr]={t:"s",v};
+   else{ws[addr].v=v;ws[addr].t="s"}
+ });
+ const out=XLSX.write(currentWorkbook,{bookType:"xlsx",type:"array"});
+ const blob=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+ const {error}=await db.storage.from(BUCKET).upload(currentFile.name,blob,{upsert:true,contentType:blob.type});
+ if(error)toast(error.message,true);else{toast("Excel saved to cloud");$("editorStatus").textContent="Saved just now";await loadFiles()}
+}
+$("authForm").onsubmit=auth;
+document.querySelectorAll(".auth-tabs button").forEach(b=>b.onclick=()=>{mode=b.dataset.auth;document.querySelectorAll(".auth-tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("authBtn").innerHTML=mode==="login"?'Enter workspace <span>→</span>':'Create my cloud <span>→</span>'});
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{currentView=b.dataset.view;document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("filesTitle").textContent=currentView==="overview"?"Recent files":currentView==="starred"?"Starred files":currentView==="recent"?"Recent files":"My files";render();$("sidebar").classList?.remove("show")});
+$("search").oninput=render;$("refresh").onclick=loadFiles;$("uploadTop").onclick=triggerUpload;$("uploadSide").onclick=triggerUpload;$("heroUpload").onclick=triggerUpload;$("emptyUpload").onclick=triggerUpload;$("viewAll").onclick=()=>{currentView="files";document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.view==="files"));render()};
+$("fileInput").onchange=e=>uploadFiles([...e.target.files]);
+$("logout").onclick=()=>db.auth.signOut();$("closeEditor").onclick=()=>{$("editor").classList.add("hidden");currentWorkbook=null};$("saveEdit").onclick=saveExcel;
+$("downloadEdit").onclick=()=>{if(!currentWorkbook)return;const out=XLSX.write(currentWorkbook,{bookType:"xlsx",type:"array"});const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out]));a.download=currentFile?.name||"edited.xlsx";a.click()};
+$("menu").onclick=()=>document.querySelector(".sidebar").classList.toggle("show");$("closeSide").onclick=()=>document.querySelector(".sidebar").classList.remove("show");
+["dragenter","dragover"].forEach(e=>document.addEventListener(e,x=>{x.preventDefault();$("dropZone").classList.remove("hidden")}));
+["dragleave","drop"].forEach(e=>document.addEventListener(e,x=>{x.preventDefault();if(e==="drop"){uploadFiles([...x.dataTransfer.files])}$("dropZone").classList.add("hidden")}));
+init();

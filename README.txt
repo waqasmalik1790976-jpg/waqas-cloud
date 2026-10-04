@@ -1,9 +1,20 @@
-WAQAS CLOUD - GREEN GLASSMORPHISM + EXCEL EDITOR
+WAQAS CLOUD — Futuristic Glassmorphism Edition
 
-Upload all four files to your existing GitHub repository and commit the changes.
-Vercel will automatically deploy the new version.
+1. Replace your existing index.html, styles.css and app.js in GitHub.
+2. Commit the changes.
+3. Vercel will automatically deploy the new version.
+4. This version keeps the same Supabase project and bucket:
+   Project: mmqawrbkirthcfxbjehp
+   Bucket: waqas
 
-Excel support: XLSX, XLS and CSV can be opened in the browser, edited, saved back to Supabase, or downloaded.
-Supabase project and bucket are already configured in app.js.
+Features:
+- Futuristic green glassmorphism dashboard
+- Floating side panel
+- Upload / download / delete / search / star
+- Excel XLSX/XLS browser editor using SheetJS
+- Multiple sheet tabs
+- Cell editing + formula/value bar
+- Save edited workbook back to Supabase
+- Responsive mobile layout
 
-Important: the browser editor is for normal spreadsheet editing. Advanced Excel VBA/macros are not executed in the browser.
+Note: Excel VBA/macros and some advanced Excel formatting are not supported by the browser editor.
