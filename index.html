@@ -72,7 +72,30 @@
   </main>
 
   <div id="toast" class="toast"></div>
+
+  <div id="excelModal" class="editor-modal" hidden>
+    <div class="editor-window glass">
+      <div class="editor-top">
+        <div>
+          <div class="editor-title" id="editorFileName">Excel Editor</div>
+          <div class="editor-subtitle">Edit your spreadsheet and save it back to Waqas Cloud</div>
+        </div>
+        <div class="editor-actions">
+          <button id="saveExcelBtn" class="primary">💾 Save to Cloud</button>
+          <button id="downloadExcelBtn" class="ghost">Download</button>
+          <button id="closeExcelBtn" class="ghost">✕ Close</button>
+        </div>
+      </div>
+      <div id="sheetTabs" class="sheet-tabs"></div>
+      <div class="excel-wrap">
+        <table id="excelTable" class="excel-table"></table>
+      </div>
+      <div class="editor-status" id="editorStatus">Ready</div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
