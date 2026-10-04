@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waqas Cloud — Glass Storage</title>
+  <meta name="description" content="Private glassmorphism cloud storage powered by Supabase">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c"></div>
+
+  <main class="shell">
+    <section id="authView" class="auth-card glass">
+      <div class="brand"><span class="brand-icon">☁</span><div><b>WAQAS CLOUD</b><small>Private glass storage</small></div></div>
+      <div class="auth-copy">
+        <span class="eyebrow">SECURE CLOUD</span>
+        <h1>Your files.<br><span>Everywhere.</span></h1>
+        <p>Upload, search, download and manage your files from one beautiful dashboard.</p>
+      </div>
+      <form id="authForm">
+        <label>Email<input id="email" type="email" placeholder="you@example.com" required></label>
+        <label>Password<input id="password" type="password" placeholder="••••••••" minlength="6" required></label>
+        <button id="authBtn" class="primary" type="submit">Sign in</button>
+        <button id="toggleAuth" class="ghost" type="button">Create a new account</button>
+        <p id="authMsg" class="msg"></p>
+      </form>
+    </section>
+
+    <section id="appView" hidden>
+      <header class="topbar glass">
+        <div class="brand"><span class="brand-icon">☁</span><div><b>WAQAS CLOUD</b><small>Private storage</small></div></div>
+        <div class="top-actions">
+          <span id="userEmail" class="user-email"></span>
+          <button id="logoutBtn" class="ghost small">Log out</button>
+        </div>
+      </header>
+
+      <div class="hero glass">
+        <div>
+          <span class="eyebrow">MY STORAGE</span>
+          <h1>Good to see you.</h1>
+          <p>Keep your work organized, private and accessible.</p>
+        </div>
+        <label class="upload-btn">
+          <input id="fileInput" type="file" multiple>
+          <span>＋ Upload files</span>
+        </label>
+      </div>
+
+      <div class="stats">
+        <div class="stat glass"><span>FILES</span><strong id="fileCount">0</strong><small>in your cloud</small></div>
+        <div class="stat glass"><span>STORAGE USED</span><strong id="storageUsed">0 MB</strong><small>current files</small></div>
+        <div class="stat glass"><span>BUCKET</span><strong>WAQAS</strong><small>private storage</small></div>
+      </div>
+
+      <section class="files-card glass">
+        <div class="section-head">
+          <div><h2>My files</h2><p id="statusText">Loading…</p></div>
+          <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search files…"></div>
+        </div>
+        <div id="dropZone" class="drop-zone">
+          <div class="drop-icon">↑</div><b>Drop files here</b><span>or use the Upload files button</span>
+        </div>
+        <div id="fileList" class="file-list"></div>
+        <div id="emptyState" class="empty" hidden><div>◫</div><b>No files found</b><span>Upload your first file to get started.</span></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
