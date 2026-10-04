@@ -3,102 +3,100 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WAQAS CLOUD — Futuristic Cloud Storage</title>
+<title>WAQAS CLOUD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-<div class="ambient a1"></div><div class="ambient a2"></div>
-<div id="toast"></div>
-
-<section id="auth" class="auth-screen">
-  <div class="auth-card glass">
-    <div class="brand-mark">W</div>
-    <div class="eyebrow">PRIVATE CLOUD WORKSPACE</div>
-    <h1>WAQAS <span>CLOUD</span></h1>
-    <p>Secure files. Futuristic workspace. Everything in one place.</p>
-    <div class="auth-tabs"><button class="active" data-auth="login">Sign in</button><button data-auth="signup">Create account</button></div>
-    <form id="authForm">
-      <input id="email" type="email" placeholder="Email address" required>
-      <input id="password" type="password" placeholder="Password" required minlength="6">
-      <button class="primary wide" type="submit" id="authBtn">Enter workspace <span>→</span></button>
-    </form>
-    <small id="authMsg">Use your Supabase account to continue.</small>
-  </div>
-</section>
-
-<div id="app" class="app hidden">
-  <aside class="sidebar glass">
-    <div class="brand"><div class="brand-mark small">W</div><div><b>WAQAS</b><span>CLOUD</span></div></div>
-    <button id="closeSide" class="mobile-close">×</button>
-    <nav>
-      <button class="nav active" data-view="overview"><i>⌂</i> Overview</button>
-      <button class="nav" data-view="files"><i>▦</i> My Files</button>
-      <button class="nav" data-view="recent"><i>◷</i> Recent</button>
-      <button class="nav" data-view="starred"><i>☆</i> Starred</button>
-    </nav>
-    <div class="side-storage">
-      <div class="side-title"><span>STORAGE</span><b id="sidePct">0%</b></div>
-      <div class="progress"><span id="sideProgress"></span></div>
-      <p><strong id="sideUsed">0 B</strong> used of 5 GB</p>
-      <button id="uploadSide" class="upload-mini">＋ Upload files</button>
-    </div>
-    <div class="user-box">
-      <div class="avatar" id="avatar">W</div><div class="user-email" id="userEmail">—</div>
-      <button id="logout" title="Sign out">↪</button>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandMark">W</div><div><b>WAQAS</b><span>CLOUD</span></div></div>
+    <div class="navTitle">WORKSPACE</div>
+    <button class="nav active" data-view="dashboard">◈ <span>Dashboard</span></button>
+    <button class="nav" data-view="files">▦ <span>My Files</span></button>
+    <button class="nav" data-view="excel">▤ <span>Excel Workspace</span></button>
+    <button class="nav" data-view="history">◷ <span>File History</span></button>
+    <div class="navTitle">TOOLS</div>
+    <button class="nav" id="uploadNav">↥ <span>Upload File</span></button>
+    <button class="nav" id="downloadAll">⇩ <span>Download</span></button>
+    <div class="sideBottom">
+      <div class="storageMini"><div class="storageHead"><span>Cloud storage</span><b id="storagePct">0%</b></div><div class="progress"><i id="storageBar"></i></div><small id="storageText">0 MB used</small></div>
+      <button class="logout" id="logoutBtn">↪ Sign out</button>
     </div>
   </aside>
 
-  <main>
+  <main class="main">
     <header class="topbar">
-      <button id="menu" class="menu-btn">☰</button>
-      <div class="search glass"><span>⌕</span><input id="search" placeholder="Search files, spreadsheets, documents..."></div>
-      <div class="top-actions"><button id="refresh" class="icon-btn">↻</button><button id="uploadTop" class="primary">＋ Upload</button></div>
+      <div class="mobileBrand"><div class="brandMark">W</div><b>WAQAS CLOUD</b></div>
+      <div class="search"><span>⌕</span><input id="search" placeholder="Search files, spreadsheets, documents..."></div>
+      <div class="topActions">
+        <button class="iconBtn" id="refreshBtn" title="Refresh">↻</button>
+        <button class="summaryBtn" id="insightsBtn"><span>✦</span> Cloud Insights</button>
+        <div class="avatar" id="avatar">W</div>
+      </div>
     </header>
 
     <section class="content">
-      <div class="page-head"><div><div class="eyebrow">CLOUD CONTROL CENTER</div><h2 id="pageTitle">Good to see you.</h2><p>Your private workspace is ready.</p></div><div class="status"><span></span> Cloud connected</div></div>
-
-      <div class="hero-grid">
-        <div class="hero glass">
-          <div><div class="eyebrow">YOUR DIGITAL SPACE</div><h3>All your work.<br><em>One intelligent cloud.</em></h3><p>Store, preview and work with your files from one futuristic workspace.</p><button id="heroUpload" class="primary">Upload files <span>↗</span></button></div>
-          <div class="orb"><div class="orb-ring"></div><div class="orb-core">☁</div></div>
+      <div id="loginPanel" class="loginPanel">
+        <div class="loginArt"><div class="orb">☁</div></div>
+        <div class="loginBox">
+          <div class="eyebrow">PRIVATE CLOUD WORKSPACE</div>
+          <h1>Your files,<br><em>beautifully organized.</em></h1>
+          <p>Sign in to access your Supabase cloud storage and work with Excel files directly in your browser.</p>
+          <input id="email" type="email" placeholder="Email address">
+          <input id="password" type="password" placeholder="Password">
+          <button class="primary full" id="loginBtn">Sign in to cloud</button>
+          <button class="ghost full" id="signupBtn">Create account</button>
+          <div id="authMsg" class="authMsg"></div>
         </div>
-        <div class="metric glass"><div class="metric-label">TOTAL FILES <span>↗</span></div><strong id="fileCount">0</strong><p>Files in your cloud</p><div class="spark">╱╲╱╲╱╱╲╱</div></div>
-      </div>
+      </section>
 
-      <div class="section-row"><div><h3>Workspace</h3><p>Quick overview of your cloud</p></div></div>
-      <div class="cards">
-        <div class="stat glass"><div class="stat-icon green">◫</div><div><span>STORAGE USED</span><strong id="used">0 B</strong><small>of 5 GB</small></div></div>
-        <div class="stat glass"><div class="stat-icon blue">▣</div><div><span>DOCUMENTS</span><strong id="docCount">0</strong><small>files</small></div></div>
-        <div class="stat glass"><div class="stat-icon purple">⌁</div><div><span>SPREADSHEETS</span><strong id="sheetCount">0</strong><small>Excel files</small></div></div>
-        <div class="stat glass"><div class="stat-icon orange">◉</div><div><span>RECENT</span><strong id="recentCount">0</strong><small>latest files</small></div></div>
-      </div>
+      <section id="dashboardView" class="view">
+        <div class="hero">
+          <div><div class="eyebrow">CLOUD OVERVIEW</div><h1>Good to see you, <span>Waqas.</span></h1><p>Everything you need is in one calm, organized workspace.</p></div>
+          <button class="primary" id="heroUpload">+ Upload new file</button>
+        </div>
 
-      <div class="section-row files-head"><div><h3 id="filesTitle">Recent files</h3><p>Open a file to preview or work with it.</p></div><button id="viewAll" class="ghost">View all →</button></div>
-      <div id="fileGrid" class="file-grid"></div>
-      <div id="empty" class="empty glass hidden"><div>◌</div><h3>No files found</h3><p>Upload an Excel, PDF, image or document to get started.</p><button id="emptyUpload" class="primary">Upload file</button></div>
+        <div class="kpis">
+          <div class="kpi"><div class="kIcon purple">▦</div><div><small>Total files</small><strong id="kFiles">0</strong><label>in your cloud</label></div><div class="spark">↗</div></div>
+          <div class="kpi"><div class="kIcon peach">◫</div><div><small>Storage used</small><strong id="kStorage">0 MB</strong><label>of 5 GB workspace</label></div><div class="spark">↗</div></div>
+          <div class="kpi"><div class="kIcon green">▤</div><div><small>Excel files</small><strong id="kExcel">0</strong><label>ready to edit</label></div><div class="spark">↗</div></div>
+          <div class="kpi"><div class="kIcon lavender">◷</div><div><small>Recent files</small><strong id="kRecent">0</strong><label>updated this week</label></div><div class="spark">↗</div></div>
+        </div>
+
+        <div class="grid2">
+          <div class="card chartCard"><div class="cardHead"><div><h3>File activity</h3><p>Uploads across your workspace</p></div><select id="chartRange"><option>Last 7 days</option><option>Last 30 days</option></select></div><div class="bars" id="bars"></div><div class="days" id="days"></div></div>
+          <div class="card donutCard"><div class="cardHead"><div><h3>File categories</h3><p>What is in your cloud</p></div></div><div class="donutWrap"><div class="donut" id="donut"><div><b id="donutTotal">0</b><span>files</span></div></div><div class="legend" id="legend"></div></div></div>
+        </div>
+
+        <div class="card recentCard">
+          <div class="cardHead"><div><h3>Recent files</h3><p>Your latest cloud activity</p></div><button class="linkBtn" data-view="files">View all →</button></div>
+          <div class="tableWrap"><table><thead><tr><th>NAME</th><th>TYPE</th><th>SIZE</th><th>UPDATED</th><th></th></tr></thead><tbody id="recentBody"></tbody></table></div>
+          <div id="emptyRecent" class="empty">No files yet. Upload your first document.</div>
+        </div>
+      </section>
+
+      <section id="filesView" class="view hidden">
+        <div class="pageHead"><div><div class="eyebrow">MY FILES</div><h2>All cloud files</h2><p>Upload, download, delete and search your files.</p></div><button class="primary" id="filesUpload">+ Upload file</button></div>
+        <div class="card fileCard"><div id="fileGrid" class="fileGrid"></div><div id="emptyFiles" class="empty">No files found.</div></div>
+      </section>
+
+      <section id="excelView" class="view hidden">
+        <div class="pageHead"><div><div class="eyebrow">EXCEL WORKSPACE</div><h2>Work with spreadsheets</h2><p>Open an XLSX/XLS file, edit cells and save it back to your cloud.</p></div></div>
+        <div class="card excelCard"><div id="excelEmpty" class="empty">Open an Excel file from My Files to start editing.</div><div id="excelEditor" class="hidden"><div class="excelTop"><b id="excelName"></b><button class="primary" id="saveExcel">Save to cloud</button></div><div id="sheetTabs" class="sheetTabs"></div><div class="formula"><span>fx</span><input id="formulaBar"></div><div class="sheetScroll"><table id="sheetTable"></table></div></div></div>
+      </section>
+
+      <section id="historyView" class="view hidden">
+        <div class="pageHead"><div><div class="eyebrow">FILE HISTORY</div><h2>Cloud activity</h2><p>Your files and their latest update times.</p></div></div>
+        <div class="card recentCard"><div class="tableWrap"><table><thead><tr><th>NAME</th><th>TYPE</th><th>SIZE</th><th>UPDATED</th><th>ACTION</th></tr></thead><tbody id="historyBody"></tbody></table></div></div>
+      </section>
     </section>
   </main>
 </div>
-
-<div id="fileInputWrap" class="hidden"><input id="fileInput" type="file" multiple></div>
-
-<div id="editor" class="editor hidden">
-  <div class="editor-top">
-    <div class="editor-title"><span>▦</span><div><b id="editorName">Excel file</b><small id="editorStatus">Ready</small></div></div>
-    <div class="sheet-tabs" id="sheetTabs"></div>
-    <div class="editor-actions"><button id="downloadEdit" class="ghost">Download</button><button id="saveEdit" class="primary">Save to cloud</button><button id="closeEditor" class="icon-btn">×</button></div>
-  </div>
-  <div class="formula"><span id="cellRef">A1</span><input id="formula" placeholder="Select a cell to view or edit its value"></div>
-  <div id="sheetArea" class="sheet-area"></div>
-</div>
-
-<div id="dropZone" class="drop-zone hidden"><div class="glass"><b>Drop files to upload</b><span>Release anywhere to add them to your cloud</span></div></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<input type="file" id="fileInput" hidden multiple>
+<div id="toast"></div>
 <script src="app.js"></script>
 </body>
 </html>

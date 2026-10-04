@@ -1,20 +1,23 @@
-WAQAS CLOUD — Futuristic Glassmorphism Edition
+WAQAS CLOUD — Reference Style Edition
 
-1. Replace your existing index.html, styles.css and app.js in GitHub.
-2. Commit the changes.
-3. Vercel will automatically deploy the new version.
-4. This version keeps the same Supabase project and bucket:
-   Project: mmqawrbkirthcfxbjehp
-   Bucket: waqas
+This ZIP is ready to upload to your GitHub repo.
 
-Features:
-- Futuristic green glassmorphism dashboard
-- Floating side panel
-- Upload / download / delete / search / star
-- Excel XLSX/XLS browser editor using SheetJS
-- Multiple sheet tabs
-- Cell editing + formula/value bar
-- Save edited workbook back to Supabase
-- Responsive mobile layout
+Design:
+- Light mint/white glassmorphism
+- Purple + peach + lime accents
+- Rounded premium dashboard cards
+- Sidebar + KPI cards + activity chart + donut chart + recent files
+- Cloud Insights button
+- My Files grid
+- Excel Workspace with XLSX/XLS editing
+- Supabase Storage integration
 
-Note: Excel VBA/macros and some advanced Excel formatting are not supported by the browser editor.
+Supabase project/bucket are already configured in app.js.
+
+Important:
+1. Replace the files in your GitHub repo with the files from this ZIP.
+2. Vercel should auto-deploy from GitHub.
+3. If your Supabase Storage policies currently allow authenticated users to access the bucket, uploads/downloads will work.
+4. For multi-user privacy, use user-id folders and Storage policies that enforce auth.uid() = foldername(name)[1].
+
+The browser Excel editor is designed for practical cell editing and saving. Complex Excel formatting/formulas may not be preserved perfectly by SheetJS Community Edition.
