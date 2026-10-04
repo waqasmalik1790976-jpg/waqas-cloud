@@ -1,13 +1,9 @@
-WAQAS CLOUD - EXCEL EDITOR UPGRADE
+WAQAS CLOUD - GREEN GLASSMORPHISM + EXCEL EDITOR
 
-This version adds an in-browser Excel editor for XLSX, XLS and CSV files.
+Upload all four files to your existing GitHub repository and commit the changes.
+Vercel will automatically deploy the new version.
 
-Features:
-- Open Excel/CSV from the cloud
-- Edit cells directly in the browser
-- Multiple worksheet tabs
-- Save edited workbook back to Supabase
-- Download edited workbook
-- Existing login/upload/download/delete features remain
+Excel support: XLSX, XLS and CSV can be opened in the browser, edited, saved back to Supabase, or downloaded.
+Supabase project and bucket are already configured in app.js.
 
-No build step is required. Replace the files in the GitHub repository with the files in this ZIP, then Vercel will redeploy automatically.
+Important: the browser editor is for normal spreadsheet editing. Advanced Excel VBA/macros are not executed in the browser.

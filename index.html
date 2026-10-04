@@ -1,101 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Waqas Cloud — Glass Storage</title>
-  <meta name="description" content="Private glassmorphism cloud storage powered by Supabase">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Waqas Cloud — Green Glass Storage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c"></div>
-
-  <main class="shell">
-    <section id="authView" class="auth-card glass">
-      <div class="brand"><span class="brand-icon">☁</span><div><b>WAQAS CLOUD</b><small>Private glass storage</small></div></div>
-      <div class="auth-copy">
-        <span class="eyebrow">SECURE CLOUD</span>
-        <h1>Your files.<br><span>Everywhere.</span></h1>
-        <p>Upload, search, download and manage your files from one beautiful dashboard.</p>
-      </div>
-      <form id="authForm">
-        <label>Email<input id="email" type="email" placeholder="you@example.com" required></label>
-        <label>Password<input id="password" type="password" placeholder="••••••••" minlength="6" required></label>
-        <button id="authBtn" class="primary" type="submit">Sign in</button>
-        <button id="toggleAuth" class="ghost" type="button">Create a new account</button>
-        <p id="authMsg" class="msg"></p>
-      </form>
-    </section>
-
-    <section id="appView" hidden>
-      <header class="topbar glass">
-        <div class="brand"><span class="brand-icon">☁</span><div><b>WAQAS CLOUD</b><small>Private storage</small></div></div>
-        <div class="top-actions">
-          <span id="userEmail" class="user-email"></span>
-          <button id="logoutBtn" class="ghost small">Log out</button>
-        </div>
-      </header>
-
-      <div class="hero glass">
-        <div>
-          <span class="eyebrow">MY STORAGE</span>
-          <h1>Good to see you.</h1>
-          <p>Keep your work organized, private and accessible.</p>
-        </div>
-        <label class="upload-btn">
-          <input id="fileInput" type="file" multiple>
-          <span>＋ Upload files</span>
-        </label>
-      </div>
-
-      <div class="stats">
-        <div class="stat glass"><span>FILES</span><strong id="fileCount">0</strong><small>in your cloud</small></div>
-        <div class="stat glass"><span>STORAGE USED</span><strong id="storageUsed">0 MB</strong><small>current files</small></div>
-        <div class="stat glass"><span>BUCKET</span><strong>WAQAS</strong><small>private storage</small></div>
-      </div>
-
-      <section class="files-card glass">
-        <div class="section-head">
-          <div><h2>My files</h2><p id="statusText">Loading…</p></div>
-          <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search files…"></div>
-        </div>
-        <div id="dropZone" class="drop-zone">
-          <div class="drop-icon">↑</div><b>Drop files here</b><span>or use the Upload files button</span>
-        </div>
-        <div id="fileList" class="file-list"></div>
-        <div id="emptyState" class="empty" hidden><div>◫</div><b>No files found</b><span>Upload your first file to get started.</span></div>
-      </section>
-    </section>
-  </main>
-
-  <div id="toast" class="toast"></div>
-
-  <div id="excelModal" class="editor-modal" hidden>
-    <div class="editor-window glass">
-      <div class="editor-top">
-        <div>
-          <div class="editor-title" id="editorFileName">Excel Editor</div>
-          <div class="editor-subtitle">Edit your spreadsheet and save it back to Waqas Cloud</div>
-        </div>
-        <div class="editor-actions">
-          <button id="saveExcelBtn" class="primary">💾 Save to Cloud</button>
-          <button id="downloadExcelBtn" class="ghost">Download</button>
-          <button id="closeExcelBtn" class="ghost">✕ Close</button>
-        </div>
-      </div>
-      <div id="sheetTabs" class="sheet-tabs"></div>
-      <div class="excel-wrap">
-        <table id="excelTable" class="excel-table"></table>
-      </div>
-      <div class="editor-status" id="editorStatus">Ready</div>
-    </div>
+<div class="bg-orb orb1"></div><div class="bg-orb orb2"></div><div class="bg-orb orb3"></div>
+<section id="authView" class="auth-page">
+  <div class="auth-card glass">
+    <div class="brand"><span class="logo">☁</span><div><b>WAQAS CLOUD</b><small>Green Glass Storage</small></div></div>
+    <div class="auth-copy"><span class="eyebrow">PRIVATE CLOUD</span><h1>Your files.<br><em>Everywhere.</em></h1><p>Upload, manage and edit your work from one beautiful cloud workspace.</p></div>
+    <form id="authForm"><label>Email<input id="email" type="email" required placeholder="you@example.com"></label><label>Password<input id="password" type="password" minlength="6" required placeholder="••••••••"></label><button class="primary" id="authBtn" type="submit">Sign in</button><button class="link-btn" id="toggleAuth" type="button">Create a new account</button><p id="authMsg" class="msg"></p></form>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+</section>
+<section id="appView" class="app" hidden>
+  <aside class="sidebar glass">
+    <div class="brand side-brand"><span class="logo">☁</span><div><b>WAQAS</b><small>CLOUD</small></div></div>
+    <nav><button class="nav-item active" data-page="files"><span>▦</span> My Files</button><button class="nav-item" data-page="recent"><span>◷</span> Recent</button><button class="nav-item" data-page="starred"><span>☆</span> Starred</button></nav>
+    <div class="side-bottom"><div class="mini-storage"><div class="mini-row"><span>Cloud storage</span><b id="sideStorage">0 MB</b></div><div class="progress"><i id="storageBar"></i></div><small id="sideFileCount">0 files</small></div><button id="logoutBtn" class="logout">↪ Log out</button></div>
+  </aside>
+  <main class="main">
+    <header class="topbar glass"><div class="mobile-title"><span class="logo">☁</span><b>WAQAS CLOUD</b></div><div class="top-right"><span id="userEmail"></span><button id="mobileUpload" class="primary small">＋ Upload</button></div></header>
+    <div class="page-head"><div><span class="eyebrow">MY STORAGE</span><h1>My Files</h1><p>Everything you upload, in one place.</p></div><label class="upload-btn"><input id="fileInput" type="file" multiple><span>＋ Upload files</span></label></div>
+    <div class="stats"><div class="stat glass"><span>TOTAL FILES</span><strong id="fileCount">0</strong><small>in your cloud</small></div><div class="stat glass"><span>STORAGE USED</span><strong id="storageUsed">0 B</strong><small>current files</small></div><div class="stat glass"><span>EXCEL FILES</span><strong id="excelCount">0</strong><small>ready to edit</small></div></div>
+    <section class="files-card glass"><div class="section-head"><div><h2 id="sectionTitle">All files</h2><p id="statusText">Loading…</p></div><div class="search"><span>⌕</span><input id="searchInput" placeholder="Search files…"></div></div><div id="dropZone" class="drop-zone"><div class="drop-icon">↑</div><b>Drop files here</b><span>or click to choose files</span></div><div id="fileList" class="file-list"></div><div id="emptyState" class="empty" hidden><div>◫</div><b>No files found</b><span>Upload your first file to get started.</span></div></section>
+  </main>
+</section>
+<div id="toast" class="toast"></div>
+<div id="excelModal" class="editor-modal" hidden>
+ <div class="editor-window glass">
+  <div class="editor-top"><div class="editor-file"><div class="excel-badge">X</div><div><strong id="editorFileName">Excel file</strong><small id="editorStatus">Ready</small></div></div><div class="editor-actions"><button id="saveExcelBtn" class="primary">💾 Save to Cloud</button><button id="downloadExcelBtn" class="ghost">Download</button><button id="closeExcelBtn" class="ghost">✕</button></div></div>
+  <div id="sheetTabs" class="sheet-tabs"></div><div class="excel-toolbar"><span>Double-click a cell or start typing to edit</span><span id="cellHint"></span></div><div class="excel-wrap"><table id="excelTable" class="excel-table"></table></div>
+ </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+</body></html>
