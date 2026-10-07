@@ -55,8 +55,10 @@ td.x button{border:0;background:transparent;color:#d33;font-size:20px;cursor:poi
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1b2a6b;color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:9}
 #toast.on{opacity:1}
 
-/* Previous Balance label: red + bold */
-#plabel{color:#dc2626 !important;font-weight:800 !important;}
+/* Previous Balance + Advance Paid */
+#plabel{color:#111827 !important;font-weight:800 !important;}
+#prev{color:#111827 !important;font-weight:800 !important;}
+#advance{color:#dc2626 !important;font-weight:800 !important;text-align:right;}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1b2a6b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Payment Slip"><style>.appbar{max-width:920px;margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border:1px solid rgba(180,190,215,.55);border-radius:14px;box-shadow:0 8px 28px rgba(20,30,80,.10)}.appbrand{font-size:18px;font-weight:800;color:var(--main)}.appstatus{font-size:12px;color:#64748b}@media(max-width:600px){.appbar{padding:10px 12px}.appbrand{font-size:16px}.appstatus{font-size:11px}}</style></head>
 <body>
@@ -76,19 +78,21 @@ td.x button{border:0;background:transparent;color:#d33;font-size:20px;cursor:poi
     <div class="sm"><div class="b">
       <div class="r"><span>Amount</span><span id="sub"></span></div>
       <div class="r"><input class="f" id="plabel" aria-label="Previous balance label"><input class="f pv" id="prev" inputmode="decimal" aria-label="Previous balance"></div>
+      <div class="r"><span style="color:#dc2626 !important;font-weight:800">Advance Paid</span><input class="f pv" id="advance" inputmode="decimal" aria-label="Advance paid"></div>
       <div class="t"><span>Total Payable Balance</span><span id="tot"></span></div>
     </div></div>
   </div>
-  <p class="note">Kisi bhi likhe hue par click karke edit karein. Amount aur Total khud hisaab hote hain.<br>"Download PDF" dabayen, file save karke boss ko WhatsApp par bhej dein. Roz ke liye "Next day" dabayen.</p>
+  <p class="note">Kisi bhi likhe hue par click karke edit karein. Advance Paid apni marzi se editable hai. Total khud hisaab hota hai.<br>"Download PDF" dabayen, file save karke boss ko WhatsApp par bhej dein. Roz ke liye "Next day" dabayen.</p>
 </div>
 <div id="toast" role="status"></div>
 <script>
 var KEY="slip8V1";
 var DEF={bank:"Meezan Bank Bhalwal",title:"Attah Muhammad",acct:"PK06 MEZN 0098 4501 1284 2517",date:"5-Oct-26",plabel:"Previous Balance 4-10-2026",prev:"1769350",
-rows:[{v:"AJK-1377",p:"Gutka",gp:"5",nw:"287.875",pw:"290.375",rate:"610"}]};
+rows:[{v:"AJK-1377",p:"Gutka",gp:"5",nw:"287.875",pw:"290.375",rate:"610"}],advancePaid:""};
 var S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 if(!S||!S.rows)S=JSON.parse(JSON.stringify(DEF));
+if(typeof S.advancePaid==="undefined")S.advancePaid="";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function num(x){var n=parseFloat(String(x).replace(/,/g,""));return isNaN(n)?0:n}
 function fmt(n){return Math.round(n).toLocaleString("en-US")}
@@ -120,9 +124,12 @@ function calc(){
   S.rows.forEach(function(r,i){var e=$("am"+i);if(e)e.textContent=fmt(Math.round(num(r.pw)*num(r.rate)))});
   var sum=rowTotal();
   $("sub").textContent=fmt(sum);
-  $("tot").textContent=fmt(sum+num(S.prev));
+  $("tot").textContent=fmt(sum+num(S.prev)-num(S.advancePaid));
 }
 ["bank","title","acct","date","plabel"].forEach(function(k){var e=$(k);e.value=S[k];e.oninput=function(){S[k]=e.value;save()}});
+var ae=$("advance");ae.value=fmt(num(S.advancePaid));
+ae.oninput=function(){S.advancePaid=ae.value;calc();save()};
+ae.onblur=function(){ae.value=fmt(num(S.advancePaid))};
 var pe=$("prev");pe.value=fmt(num(S.prev));
 pe.oninput=function(){S.prev=pe.value;calc();save()};
 pe.onblur=function(){pe.value=fmt(num(S.prev))};
@@ -132,15 +139,16 @@ function ask(btn,msg,fn){if(btn.dataset.arm){clearTimeout(btn._t);delete btn.dat
 var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function nextDay(){
   var m=/(\d{1,2})\D+([A-Za-z]{3})\D+(\d{2,4})/.exec(S.date);
-  var total=rowTotal()+Math.round(num(S.prev));
+  var total=rowTotal()+Math.round(num(S.prev))-Math.round(num(S.advancePaid));
   var d=1,mo=0,y=2026;
   if(m){d=+m[1];mo=Math.max(0,M.indexOf(m[2][0].toUpperCase()+m[2].slice(1).toLowerCase()));y=+m[3];if(y<100)y+=2000}
   S.plabel="Previous Balance "+d+"-"+(mo+1)+"-"+y;
   var nd=new Date(Date.UTC(y,mo,d+1));
   S.date=nd.getUTCDate()+"-"+M[nd.getUTCMonth()]+"-"+String(nd.getUTCFullYear()).slice(2);
   S.prev=String(total);
+  S.advancePaid="";
   S.rows=[{v:"",p:S.rows[0].p||"Gutka",gp:"",nw:"",pw:"",rate:S.rows[0].rate||""}];
-  $("date").value=S.date;$("plabel").value=S.plabel;pe.value=fmt(total);
+  $("date").value=S.date;$("plabel").value=S.plabel;pe.value=fmt(total);ae.value="";
   drawRows();save();toast("Nayi date: "+S.date);
 }
 $("next").onclick=function(){ask(this,"Pakka? Dobara dabayen",nextDay)};
