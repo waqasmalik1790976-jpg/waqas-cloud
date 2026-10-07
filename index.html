@@ -56,9 +56,12 @@ td.x button{border:0;background:transparent;color:#d33;font-size:20px;cursor:poi
 #toast.on{opacity:1}
 
 /* Previous Balance + Advance Paid */
-#plabel{color:#111827 !important;font-weight:800 !important;}
-#prev{color:#111827 !important;font-weight:800 !important;}
-#advance{color:#dc2626 !important;font-weight:800 !important;text-align:right;}
+#plabel{color:#6b749a !important;font-weight:600 !important;background:transparent !important;}
+#prev{color:#6b749a !important;font-weight:600 !important;background:transparent !important;}
+#advance{color:#6b749a !important;font-weight:600 !important;text-align:right;background:transparent !important;}
+.advance-red{color:#dc2626 !important;font-weight:700 !important;}
+#advanceLabel{color:#dc2626 !important;font-weight:800 !important;background:transparent !important;}
+#sub{color:#6b749a !important;font-weight:600 !important;background:transparent !important;}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1b2a6b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Payment Slip"><style>.appbar{max-width:920px;margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border:1px solid rgba(180,190,215,.55);border-radius:14px;box-shadow:0 8px 28px rgba(20,30,80,.10)}.appbrand{font-size:18px;font-weight:800;color:var(--main)}.appstatus{font-size:12px;color:#64748b}@media(max-width:600px){.appbar{padding:10px 12px}.appbrand{font-size:16px}.appstatus{font-size:11px}}</style></head>
 <body>
@@ -78,11 +81,11 @@ td.x button{border:0;background:transparent;color:#d33;font-size:20px;cursor:poi
     <div class="sm"><div class="b">
       <div class="r"><span>Amount</span><span id="sub"></span></div>
       <div class="r"><input class="f" id="plabel" aria-label="Previous balance label"><input class="f pv" id="prev" inputmode="decimal" aria-label="Previous balance"></div>
-      <div class="r"><span style="color:#dc2626 !important;font-weight:800">Advance Paid</span><input class="f pv" id="advance" inputmode="decimal" aria-label="Advance paid"></div>
+      <div class="r"><input class="f" id="advanceLabel" aria-label="Advance payment label" value="Advance Payment"><input class="f pv" id="advance" inputmode="decimal" aria-label="Advance payment"></div>
       <div class="t"><span>Total Payable Balance</span><span id="tot"></span></div>
     </div></div>
   </div>
-  <p class="note">Kisi bhi likhe hue par click karke edit karein. Advance Paid apni marzi se editable hai. Total khud hisaab hota hai.<br>"Download PDF" dabayen, file save karke boss ko WhatsApp par bhej dein. Roz ke liye "Next day" dabayen.</p>
+  <p class="note">Kisi bhi likhe hue par click karke edit karein. Advance Paid bhi editable hai. Total khud hisaab hota hai.<br>"Download PDF" dabayen, file save karke boss ko WhatsApp par bhej dein. Roz ke liye "Next day" dabayen.</p>
 </div>
 <div id="toast" role="status"></div>
 <script>
@@ -93,6 +96,7 @@ var S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 if(!S||!S.rows)S=JSON.parse(JSON.stringify(DEF));
 if(typeof S.advancePaid==="undefined")S.advancePaid="";
+if(S.advancePaid==="10000")S.advancePaid="";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function num(x){var n=parseFloat(String(x).replace(/,/g,""));return isNaN(n)?0:n}
 function fmt(n){return Math.round(n).toLocaleString("en-US")}
@@ -127,9 +131,10 @@ function calc(){
   $("tot").textContent=fmt(sum+num(S.prev)-num(S.advancePaid));
 }
 ["bank","title","acct","date","plabel"].forEach(function(k){var e=$(k);e.value=S[k];e.oninput=function(){S[k]=e.value;save()}});
-var ae=$("advance");ae.value=fmt(num(S.advancePaid));
+var al=$("advanceLabel");al.value="Advance Payment";
+var ae=$("advance");ae.value=S.advancePaid ? fmt(num(S.advancePaid)) : "";
 ae.oninput=function(){S.advancePaid=ae.value;calc();save()};
-ae.onblur=function(){ae.value=fmt(num(S.advancePaid))};
+ae.onblur=function(){ae.value=S.advancePaid ? fmt(num(S.advancePaid)) : ""};
 var pe=$("prev");pe.value=fmt(num(S.prev));
 pe.oninput=function(){S.prev=pe.value;calc();save()};
 pe.onblur=function(){pe.value=fmt(num(S.prev))};
