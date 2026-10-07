@@ -1,1 +1,10 @@
-{"name":"Payment Slip Web App","short_name":"Payment Slip","start_url":"./","display":"standalone","background_color":"#eceef6","theme_color":"#1b2a6b"}
+{
+  "name": "Payment Slip Web App",
+  "short_name": "Payment Slip",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eceef6",
+  "theme_color": "#1b2a6b",
+  "description": "Editable payment slip web app with copy, PDF and image export."
+}
