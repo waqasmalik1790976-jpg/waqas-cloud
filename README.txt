@@ -1,19 +1,22 @@
-PAYMENT SLIP WEB APP - GITHUB PAGES
+PAYMENT SLIP MANAGER — OPTION B
 
-Files:
-- index.html            Main payment slip app
-- manifest.webmanifest  Web-app/PWA settings
-- sw.js                 Service worker
-- .nojekyll             GitHub Pages helper
+This is a GitHub-ready web app using Supabase as the online database.
+It supports many payment slips in one app, with Login, New Slip, Search,
+Date Filter, Edit and Delete.
 
-GITHUB PAGES SETUP (BEGINNER)
-1. Create a new GitHub repository, for example: payment-slip.
-2. Upload ALL files from this folder into the repository root.
-3. GitHub -> Settings -> Pages.
-4. Under Build and deployment, choose "Deploy from a branch".
-5. Select Branch: main and Folder: / (root), then Save.
-6. Wait for GitHub Pages to publish the HTTPS website.
-7. Open the HTTPS link in Chrome and bookmark it.
+SETUP
+1. Create/open a Supabase project.
+2. In Supabase SQL Editor, run schema.sql.
+3. In Supabase Project Settings -> API, copy Project URL and anon public key.
+4. Open index.html and replace:
+   PASTE_YOUR_SUPABASE_URL_HERE
+   PASTE_YOUR_SUPABASE_ANON_KEY_HERE
+5. Upload ALL files in this folder to a GitHub repository.
+6. Enable GitHub Pages for the repository.
+7. Open the HTTPS GitHub Pages URL and create your account.
 
-The app saves slip data in the browser's localStorage. No database is required.
-For Copy Slip, open WhatsApp Web and use Ctrl+V after copying the slip image.
+IMPORTANT
+- The database is online and user-owned through Supabase Auth + Row Level Security.
+- "Unlimited" means the app has no artificial slip-count limit; actual storage is subject to your Supabase plan/database capacity.
+- Keep the anon public key in the frontend; NEVER put a Supabase service_role/secret key in this file.
+- The current app stores the slip rows as JSON in each database record and calculates Amount + Previous Balance - Advance Payment.

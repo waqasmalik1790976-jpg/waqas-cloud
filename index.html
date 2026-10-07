@@ -1,256 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Payment Slip - Editable</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payment Slip Manager</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--main:#1b2a6b;--accent:#c9a227;--head:#1b2a6b;--table:#3a52b8;--mainText:#ffe08a;--bg:#eceef6;--ctl:#fff;--ctlc:#1b2350;--ctlb:#cfd5e8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10131f;--ctl:#1c2133;--ctlc:#e8ecf8;--ctlb:#333b58}}
-*{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;padding:16px 12px 40px;color:var(--ctlc)}
-.wrap{max-width:920px;margin:0 auto}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.bar button{font:inherit;font-size:15px;padding:10px 15px;border-radius:10px;border:1px solid var(--ctlb);background:var(--ctl);color:var(--ctlc);cursor:pointer}
-.bar button.p{background:var(--main);border-color:var(--main);color:var(--mainText);font-weight:700}
-.bar button.n{background:var(--accent);border-color:var(--accent);color:#1a1405;font-weight:700}
-.bar button.wa{background:#25D366;border-color:#25D366;color:#fff;font-weight:700}
-.bar button:disabled{opacity:.6;cursor:wait}.theme-picker{font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--ctlb);background:var(--ctl);color:var(--ctlc);display:flex;align-items:center;gap:7px}.theme-picker select{font:inherit;border:0;background:transparent;color:inherit;outline:0;cursor:pointer}
-.slip{border-top-color:var(--accent);--fh:clamp(22px,5.4vw,33px);--fk:clamp(13px,3.2vw,15px);--fd:clamp(17px,4.4vw,26px);--fn:clamp(17px,4.2vw,24px);--fa:clamp(12px,3.2vw,23px);--ft:clamp(12.5px,3.1vw,22px);--fr:clamp(14px,3.8vw,23px);--fg:clamp(18px,4.4vw,29px);
-background:#fff;border-radius:14px;overflow:hidden;border:1px solid #d3d8e8;border-top:8px solid #c9a227;color:#1b2350;box-shadow:0 10px 30px rgba(20,30,80,.18)}
-.slip.fixed{--fh:33px;--fk:15px;--fd:26px;--fn:24px;--fa:23px;--ft:22px;--fr:23px;--fg:29px;width:900px;box-shadow:none}
-.f{font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px solid transparent;outline:0;padding:2px 3px;width:100%;min-width:0;display:block}
-input.f{border-bottom:1px dashed rgba(128,128,128,.55)}
-input.f:focus{border-bottom:2px solid #1b2a6b;background:rgba(27,42,107,.07)}
-.fixed .f{border-bottom-color:transparent}
-.hd{background:var(--head);color:#fff;padding:20px 18px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px}
-.hd .hl{flex:1 1 0;min-width:0}
-.hd .hl .f{font-size:var(--fh);font-weight:700}
-.hd .d{flex:0 0 38%;text-align:right;font-size:var(--fk);color:#aab6e6}
-.hd .d .f{text-align:right;font-size:var(--fd);font-weight:700;color:#fff;margin-top:2px}
-.ac{padding:16px 18px;border-bottom:1px solid #e1e5f0}
-.ac small{display:block;font-size:var(--fk);color:#6b749a;margin-bottom:2px}
-.ac .nm{font-size:var(--fn);font-weight:700}
-.ac .an{font-size:var(--fa);font-weight:700;color:#6b749a;letter-spacing:.8px;margin-top:4px}
-table{width:100%;border-collapse:collapse;font-size:var(--ft)}
-th{background:var(--table);color:#fff;padding:12px 2px;font-weight:700;text-align:center}
-td{padding:14px 2px;text-align:center;border-bottom:1px solid #e1e5f0;font-weight:600}
-td .f{text-align:center;padding:2px 0}
-td.am{text-align:right;padding-right:12px;font-weight:700;white-space:nowrap}
-th.am{text-align:right;padding-right:12px}
-td.x{width:34px;padding:0}
-td.x button{border:0;background:transparent;color:#d33;font-size:20px;cursor:pointer}
-.sm{display:flex;justify-content:flex-end;padding:18px 18px 22px;background:#f5f6fb}
-.sm .b{width:min(540px,100%)}
-.fixed .sm .b{width:540px}
-.r{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:var(--fr);font-weight:600;padding:8px 0;border-bottom:1px solid #e1e5f0}
-.r>span:first-child{color:#6b749a}
-.r .f{flex:1 1 0;color:#6b749a;font-weight:600}
-.r .f.pv{flex:0 0 40%;text-align:right;color:#1b2350}
-.t{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--main);color:var(--mainText);font-size:var(--fg);font-weight:700;padding:16px 18px;border-radius:10px;margin-top:14px}
-.note{font-size:13px;opacity:.75;margin-top:12px;text-align:center;line-height:1.5}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1b2a6b;color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:9}
-#toast.on{opacity:1}
-
-/* Previous Balance + Advance Paid */
-#plabel{color:#6b749a !important;font-weight:600 !important;background:transparent !important;}
-#prev{color:#6b749a !important;font-weight:600 !important;background:transparent !important;}
-#advance{color:#6b749a !important;font-weight:600 !important;text-align:right;background:transparent !important;}
-.advance-red{color:#dc2626 !important;font-weight:700 !important;}
-#advanceLabel{color:#dc2626 !important;font-weight:800 !important;background:transparent !important;}
-#sub{color:#6b749a !important;font-weight:600 !important;background:transparent !important;}
+:root{--main:#1b2a6b;--accent:#c9a227;--bg:#eef1f8;--card:rgba(255,255,255,.86);--text:#18213b;--muted:#6b749a;--danger:#dc2626;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef1f8,#e7ebf5);font-family:Segoe UI,Arial,sans-serif;color:var(--text)}button,input,select{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.side{background:rgba(255,255,255,.82);backdrop-filter:blur(18px);border-right:1px solid #d9deeb;padding:20px;position:sticky;top:0;height:100vh}.brand{font-weight:800;font-size:21px;color:var(--main);margin-bottom:25px}.nav button{width:100%;padding:12px;border:0;background:transparent;text-align:left;border-radius:10px;margin:4px 0;cursor:pointer;color:var(--text)}.nav button.active,.nav button:hover{background:#e9edf8;color:var(--main);font-weight:700}.main{padding:24px;max-width:1400px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.title h1{margin:0;font-size:28px}.title p{margin:5px 0;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #cfd6e6;background:white;padding:10px 14px;border-radius:10px;cursor:pointer}.primary{background:var(--main);color:white;border-color:var(--main)}.gold{background:var(--accent);border-color:var(--accent);font-weight:700}.danger{color:#fff;background:var(--danger);border-color:var(--danger)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.card{background:var(--card);backdrop-filter:blur(16px);border:1px solid rgba(205,212,230,.8);border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(30,45,90,.08)}.k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:800;margin-top:5px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select,.form input,.form textarea{border:1px solid #cfd6e6;background:#fff;border-radius:10px;padding:10px 12px;outline:none}.toolbar input{flex:1;min-width:220px}.tablewrap{overflow:auto}.tbl{width:100%;border-collapse:collapse;min-width:780px}.tbl th{background:var(--main);color:white;padding:12px;text-align:left}.tbl td{padding:12px;border-bottom:1px solid #e4e8f1}.tbl tr:hover{background:#f5f7fb}.small{padding:7px 10px;font-size:13px}.empty{text-align:center;padding:35px;color:var(--muted)}.modal{position:fixed;inset:0;background:rgba(10,18,40,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.show{display:flex}.dialog{width:min(1050px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 25px 70px rgba(0,0,0,.25);padding:20px}.dialog h2{margin:0 0 15px}.formgrid{display:grid;grid-template-columns:2fr 1fr;gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input{width:100%}.rows{margin-top:15px}.rowhead,.rowitem{display:grid;grid-template-columns:1.1fr 1.1fr .6fr .9fr .9fr .8fr 1fr 34px;gap:6px;align-items:center}.rowhead{font-size:12px;font-weight:700;color:var(--muted);padding:7px}.rowitem{margin-bottom:6px}.rowitem input{width:100%;padding:8px;border:1px solid #d3d9e6;border-radius:8px}.summary{margin:16px 0 0 auto;width:min(520px,100%);background:#f5f6fb;padding:14px;border-radius:12px}.sumline{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e5ee}.prev{color:#6b749a}.advance{color:#dc2626;font-weight:800}.total{display:flex;justify-content:space-between;background:var(--main);color:#ffe08a;padding:13px;border-radius:10px;margin-top:10px;font-size:20px;font-weight:800}.modalbar{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.status{font-size:13px;color:var(--muted);margin-top:10px}.login{max-width:440px;margin:10vh auto}.login h1{margin-top:0}.hidden{display:none!important}@media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:relative;border-right:0;border-bottom:1px solid #d9deeb}.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}}@media(max-width:560px){.main{padding:14px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.rowhead{display:none}.rowitem{grid-template-columns:1fr 1fr}.side{padding:14px}.nav{display:flex;gap:6px}.nav button{width:auto}}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1b2a6b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Payment Slip"><style>.appbar{max-width:920px;margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border:1px solid rgba(180,190,215,.55);border-radius:14px;box-shadow:0 8px 28px rgba(20,30,80,.10)}.appbrand{font-size:18px;font-weight:800;color:var(--main)}.appstatus{font-size:12px;color:#64748b}@media(max-width:600px){.appbar{padding:10px 12px}.appbrand{font-size:16px}.appstatus{font-size:11px}}</style></head>
+</head>
 <body>
-<div class="appbar"><div class="appbrand">💳 Payment Slip</div><div class="appstatus">Web App • Auto-saves in this browser</div></div>
-<div class="wrap">
-  <div class="bar"><label class="theme-picker">🎨 Colour <select id="theme"><option value="navy">Navy Gold</option><option value="blue">Royal Blue</option><option value="green">Emerald</option><option value="teal">Teal</option><option value="purple">Purple</option><option value="red">Ruby Red</option><option value="orange">Orange</option><option value="black">Black Gold</option></select></label>
-    <button class="p" id="pdf">Download PDF</button>
-    <button class="n" id="img">Download image</button><button class="p" id="copySlip" type="button">📋 Copy Slip</button>
-    <button id="next">Next day</button>
-    <button id="add">+ Add row</button>
-    <button id="reset">Reset</button>
-  </div>
-  <div class="slip" id="slip">
-    <div class="hd"><div class="hl"><input class="f" id="bank" aria-label="Bank"></div><div class="d">Date<input class="f" id="date" aria-label="Date"></div></div>
-    <div class="ac"><small>Account Details</small><input class="f nm" id="title" aria-label="Account title"><input class="f an" id="acct" aria-label="Account number"></div>
-    <table><thead><tr><th>Vehicle</th><th>Product</th><th>GP</th><th>N/W (M)</th><th>P/W (M)</th><th>Rate</th><th class="am">Amount</th><th class="x"></th></tr></thead><tbody id="rows"></tbody></table>
-    <div class="sm"><div class="b">
-      <div class="r"><span>Amount</span><span id="sub"></span></div>
-      <div class="r"><input class="f" id="plabel" aria-label="Previous balance label"><input class="f pv" id="prev" inputmode="decimal" aria-label="Previous balance"></div>
-      <div class="r"><input class="f" id="advanceLabel" aria-label="Advance payment label" value="Advance Payment"><input class="f pv" id="advance" inputmode="decimal" aria-label="Advance payment"></div>
-      <div class="t"><span>Total Payable Balance</span><span id="tot"></span></div>
-    </div></div>
-  </div>
-  <p class="note">Kisi bhi likhe hue par click karke edit karein. Advance Paid bhi editable hai. Total khud hisaab hota hai.<br>"Download PDF" dabayen, file save karke boss ko WhatsApp par bhej dein. Roz ke liye "Next day" dabayen.</p>
+<div id="loginView" class="login card">
+<h1>💳 Payment Slip Manager</h1><p class="k">Option B: Supabase online database. Your slips stay online and can grow with your records.</p>
+<div class="form"><div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div><div class="field" style="margin-top:10px"><label>Password</label><input id="loginPass" type="password" placeholder="Password"></div></div>
+<div class="actions" style="margin-top:14px"><button class="btn primary" id="loginBtn">Login</button><button class="btn" id="signupBtn">Create account</button></div><div id="loginMsg" class="status"></div>
 </div>
-<div id="toast" role="status"></div>
+<div id="appView" class="app hidden">
+<aside class="side"><div class="brand">💳 Payment Slip</div><div class="nav"><button class="active" id="navSlips">📋 All Slips</button><button id="navNew">➕ New Slip</button><button id="navSettings">⚙️ Settings</button></div><div class="status" style="margin-top:25px">Online database<br><span id="userEmail"></span></div><button class="btn" style="margin-top:14px;width:100%" id="logoutBtn">Logout</button></aside>
+<main class="main"><div class="top"><div class="title"><h1>Payment Slips</h1><p>Unlimited records in one web app — create, search, edit and print.</p></div><div class="actions"><button class="btn gold" id="newBtn">+ New Payment Slip</button></div></div>
+<div class="grid"><div class="card"><div class="k">Total Slips</div><div class="v" id="kSlips">0</div></div><div class="card"><div class="k">Total Amount</div><div class="v" id="kAmount">0</div></div><div class="card"><div class="k">Total Previous Balance</div><div class="v" id="kPrev">0</div></div><div class="card"><div class="k">Total Advance</div><div class="v" id="kAdvance">0</div></div></div>
+<div class="card"><div class="toolbar"><input id="search" placeholder="🔎 Search name, bank, account or date..."><input id="fromDate" type="date"><input id="toDate" type="date"><button class="btn" id="clearFilters">Clear</button></div><div class="tablewrap"><table class="tbl"><thead><tr><th>Date</th><th>Account / Person</th><th>Bank</th><th>Amount</th><th>Previous</th><th>Advance</th><th>Payable</th><th>Action</th></tr></thead><tbody id="slipTable"></tbody></table><div id="empty" class="empty hidden">No slips found.</div></div></div>
+</main></div>
+<div id="modal" class="modal"><div class="dialog"><h2 id="modalTitle">New Payment Slip</h2><div class="formgrid"><div class="field"><label>Bank</label><input id="fBank"></div><div class="field"><label>Date</label><input id="fDate" type="date"></div><div class="field"><label>Account / Person</label><input id="fTitle"></div><div class="field"><label>Account Number</label><input id="fAcct"></div><div class="field"><label>Previous Balance Label</label><input id="fPlabel"></div><div class="field"><label>Previous Balance</label><input id="fPrev" inputmode="decimal"></div></div>
+<div class="rows"><div class="rowhead"><span>Vehicle</span><span>Product</span><span>GP</span><span>N/W</span><span>P/W</span><span>Rate</span><span>Amount</span><span></span></div><div id="rowList"></div><button class="btn small" id="addRow">+ Add row</button></div>
+<div class="summary"><div class="sumline"><span>Amount</span><b id="fAmount">0</b></div><div class="sumline prev"><span>Previous Balance</span><b id="fPrevShow">0</b></div><div class="sumline advance"><span>Advance Payment</span><input id="fAdvance" inputmode="decimal" style="width:180px;padding:6px 8px;border:1px solid #e3b4b4;border-radius:7px;color:#dc2626;font-weight:800"></div><div class="total"><span>Total Payable Balance</span><span id="fTotal">0</span></div></div>
+<div class="modalbar"><button class="btn" id="cancelModal">Cancel</button><button class="btn gold" id="saveSlip">Save Slip</button></div><div id="saveMsg" class="status"></div></div></div>
 <script>
-var KEY="slip8V1";
-var DEF={bank:"Meezan Bank Bhalwal",title:"Attah Muhammad",acct:"PK06 MEZN 0098 4501 1284 2517",date:"5-Oct-26",plabel:"Previous Balance 4-10-2026",prev:"1769350",
-rows:[{v:"AJK-1377",p:"Gutka",gp:"5",nw:"287.875",pw:"290.375",rate:"610"}],advancePaid:""};
-var S;
-try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
-if(!S||!S.rows)S=JSON.parse(JSON.stringify(DEF));
-if(typeof S.advancePaid==="undefined")S.advancePaid="";
-if(S.advancePaid==="10000")S.advancePaid="";
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function num(x){var n=parseFloat(String(x).replace(/,/g,""));return isNaN(n)?0:n}
-function fmt(n){return Math.round(n).toLocaleString("en-US")}
-var $=function(i){return document.getElementById(i)};
-var toastT;
-function toast(m){var t=$("toast");t.textContent=m;t.className="on";clearTimeout(toastT);toastT=setTimeout(function(){t.className=""},3200)}
-var rowsEl=$("rows");
-function rowTotal(){return S.rows.reduce(function(s,r){return s+Math.round(num(r.pw)*num(r.rate))},0)}
-function drawRows(){
-  rowsEl.innerHTML="";
-  S.rows.forEach(function(r,i){
-    var tr=document.createElement("tr");
-    ["v","p","gp","nw","pw","rate"].forEach(function(k){
-      var td=document.createElement("td"),inp=document.createElement("input");
-      inp.className="f";inp.value=r[k];inp.setAttribute("aria-label",k);
-      if(k!="v"&&k!="p")inp.inputMode="decimal";
-      inp.oninput=function(){r[k]=inp.value;calc();save()};
-      td.appendChild(inp);tr.appendChild(td);
-    });
-    var am=document.createElement("td");am.className="am";am.id="am"+i;tr.appendChild(am);
-    var x=document.createElement("td");x.className="x";
-    var b=document.createElement("button");b.textContent="\u00d7";b.title="Row hatao";
-    b.onclick=function(){if(S.rows.length>1){S.rows.splice(i,1);drawRows();save()}};
-    x.appendChild(b);tr.appendChild(x);rowsEl.appendChild(tr);
-  });
-  calc();
-}
-function calc(){
-  S.rows.forEach(function(r,i){var e=$("am"+i);if(e)e.textContent=fmt(Math.round(num(r.pw)*num(r.rate)))});
-  var sum=rowTotal();
-  $("sub").textContent=fmt(sum);
-  $("tot").textContent=fmt(sum+num(S.prev)-num(S.advancePaid));
-}
-["bank","title","acct","date","plabel"].forEach(function(k){var e=$(k);e.value=S[k];e.oninput=function(){S[k]=e.value;save()}});
-var al=$("advanceLabel");al.value="Advance Payment";
-var ae=$("advance");ae.value=S.advancePaid ? fmt(num(S.advancePaid)) : "";
-ae.oninput=function(){S.advancePaid=ae.value;calc();save()};
-ae.onblur=function(){ae.value=S.advancePaid ? fmt(num(S.advancePaid)) : ""};
-var pe=$("prev");pe.value=fmt(num(S.prev));
-pe.oninput=function(){S.prev=pe.value;calc();save()};
-pe.onblur=function(){pe.value=fmt(num(S.prev))};
-$("add").onclick=function(){var l=S.rows[S.rows.length-1]||{};S.rows.push({v:"",p:l.p||"Gutka",gp:"",nw:"",pw:"",rate:l.rate||""});drawRows();save()};
-function ask(btn,msg,fn){if(btn.dataset.arm){clearTimeout(btn._t);delete btn.dataset.arm;btn.textContent=btn.dataset.lbl;fn();return}
-  btn.dataset.lbl=btn.textContent;btn.dataset.arm=1;btn.textContent=msg;btn._t=setTimeout(function(){delete btn.dataset.arm;btn.textContent=btn.dataset.lbl},3500)}
-var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-function nextDay(){
-  var m=/(\d{1,2})\D+([A-Za-z]{3})\D+(\d{2,4})/.exec(S.date);
-  var total=rowTotal()+Math.round(num(S.prev))-Math.round(num(S.advancePaid));
-  var d=1,mo=0,y=2026;
-  if(m){d=+m[1];mo=Math.max(0,M.indexOf(m[2][0].toUpperCase()+m[2].slice(1).toLowerCase()));y=+m[3];if(y<100)y+=2000}
-  S.plabel="Previous Balance "+d+"-"+(mo+1)+"-"+y;
-  var nd=new Date(Date.UTC(y,mo,d+1));
-  S.date=nd.getUTCDate()+"-"+M[nd.getUTCMonth()]+"-"+String(nd.getUTCFullYear()).slice(2);
-  S.prev=String(total);
-  S.advancePaid="";
-  S.rows=[{v:"",p:S.rows[0].p||"Gutka",gp:"",nw:"",pw:"",rate:S.rows[0].rate||""}];
-  $("date").value=S.date;$("plabel").value=S.plabel;pe.value=fmt(total);ae.value="";
-  drawRows();save();toast("Nayi date: "+S.date);
-}
-$("next").onclick=function(){ask(this,"Pakka? Dobara dabayen",nextDay)};
-$("reset").onclick=function(){ask(this,"Pakka? Dobara dabayen",function(){S=JSON.parse(JSON.stringify(DEF));save();location.reload()})};
-
-/* ---- export ---- */
-function snapshot(){
-  var c=$("slip").cloneNode(true);c.removeAttribute("id");c.classList.add("fixed");
-  c.querySelectorAll("input").forEach(function(i){var s=document.createElement("span");s.className=i.className;s.textContent=i.value;i.replaceWith(s)});
-  c.querySelectorAll(".x").forEach(function(e){e.remove()});
-  var w=document.createElement("div");w.style.cssText="position:fixed;left:-10000px;top:0;width:900px";w.appendChild(c);document.body.appendChild(w);
-  return {el:c,done:function(){w.remove()}};
-}
-async function render(){
-  if(!window.html2canvas)throw new Error("lib");
-  var s=snapshot();
-  try{
-    var cv=await html2canvas(s.el,{scale:2,backgroundColor:"#ffffff",logging:false});
-    var pad=64,o=document.createElement("canvas");o.width=cv.width+pad*2;o.height=cv.height+pad*2;
-    var x=o.getContext("2d");x.fillStyle="#eceef6";x.fillRect(0,0,o.width,o.height);x.drawImage(cv,pad,pad);
-    return o;
-  }finally{s.done()}
-}
-async function saveFile(name,blob){
-  var dl=null;
-  try{if(window.claude&&claude.use)dl=await claude.use("downloads")}catch(e){}
-  if(dl){
-    try{await dl.save({filename:name,data:blob});toast("File save ho gayi");}
-    catch(e){toast(e&&e.code=="declined"?"Save cancel kiya":"Save nahi ho saki, dobara try karein")}
-    return;
-  }
-  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(function(){URL.revokeObjectURL(a.href)},4000);toast("File download ho rahi hai");
-}
-function baseName(){return "Slip_"+String(S.date).replace(/[^\w-]+/g,"_")}
-async function exportAs(kind,btn){
-  var lbl=btn.textContent;btn.disabled=true;btn.textContent="Ban rahi hai...";
-  try{
-    var o=await render();
-    if(kind=="img"){
-      var b=await new Promise(function(r){o.toBlob(r,"image/png")});
-      await saveFile(baseName()+".png",b);
-    }else{
-      var J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw new Error("lib");
-      var w=o.width/2,h=o.height/2;
-      var pdf=new J({orientation:w>h?"l":"p",unit:"px",format:[w,h],hotfixes:["px_scaling"]});
-      pdf.addImage(o.toDataURL("image/jpeg",0.95),"JPEG",0,0,w,h);
-      await saveFile(baseName()+".pdf",pdf.output("blob"));
-    }
-  }catch(e){toast(e&&e.message=="lib"?"Internet check karein, phir dobara dabayen":"Kuch masla aa gaya, dobara try karein")}
-  btn.disabled=false;btn.textContent=lbl;
-}
-$("pdf").onclick=function(){exportAs("pdf",this)};
-$("img").onclick=function(){exportAs("img",this)};
-
-var THEMES={
-  navy:{main:"#1b2a6b",accent:"#c9a227",head:"#1b2a6b",table:"#3a52b8",text:"#ffe08a"},
-  blue:{main:"#075985",accent:"#38bdf8",head:"#075985",table:"#0284c7",text:"#e0f2fe"},
-  green:{main:"#166534",accent:"#84cc16",head:"#166534",table:"#16a34a",text:"#ecfccb"},
-  teal:{main:"#115e59",accent:"#2dd4bf",head:"#115e59",table:"#0f766e",text:"#ccfbf1"},
-  purple:{main:"#581c87",accent:"#c084fc",head:"#581c87",table:"#7e22ce",text:"#f3e8ff"},
-  red:{main:"#7f1d1d",accent:"#f87171",head:"#7f1d1d",table:"#b91c1c",text:"#fee2e2"},
-  orange:{main:"#9a3412",accent:"#fb923c",head:"#9a3412",table:"#ea580c",text:"#ffedd5"},
-  black:{main:"#111827",accent:"#d4af37",head:"#111827",table:"#374151",text:"#fde68a"}
-};
-function applyTheme(n){
-  var t=THEMES[n]||THEMES.navy,r=document.documentElement;
-  r.style.setProperty("--main",t.main);r.style.setProperty("--accent",t.accent);
-  r.style.setProperty("--head",t.head);r.style.setProperty("--table",t.table);
-  r.style.setProperty("--mainText",t.text);
-  try{localStorage.setItem("slip8Theme",n)}catch(e){}
-}
-var themeSelect=$("theme"),savedTheme="navy";
-try{savedTheme=localStorage.getItem("slip8Theme")||"navy"}catch(e){}
-themeSelect.value=savedTheme;applyTheme(savedTheme);
-themeSelect.onchange=function(){applyTheme(this.value)};
-
-async function copySlip(){
-  var btn=$("copySlip"),old=btn.textContent;
-  btn.disabled=true;btn.textContent="Copying...";
-  try{
-    var o=await render();
-    var blob=await new Promise(function(resolve){o.toBlob(resolve,"image/png")});
-    if(!blob)throw new Error("copy");
-    if(navigator.clipboard&&window.ClipboardItem&&navigator.clipboard.write){
-      await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
-      toast("Pori slip copy ho gayi — WhatsApp mein Ctrl+V karein");
-    }else{
-      await saveFile(baseName()+".png",blob);
-      toast("Image copy support nahi — slip save ho gayi");
-    }
-  }catch(e){toast("Copy nahi ho saki. Download Image use karein.")}
-  btn.disabled=false;btn.textContent=old;
-}
-$("copySlip").onclick=copySlip;
-
-drawRows();
+const SUPABASE_URL='PASTE_YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY='PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+let sb=null,user=null,editingId=null,rows=[];
+const $=id=>document.getElementById(id), fmt=n=>Math.round(Number(n)||0).toLocaleString('en-US'), num=v=>parseFloat(String(v??'').replace(/,/g,''))||0;
+function configured(){return SUPABASE_URL.startsWith('http')&&SUPABASE_ANON_KEY.length>30}
+function msg(t){$('loginMsg').textContent=t}
+async function init(){if(!configured()){msg('Supabase setup required: open Settings after uploading the app, or edit the two Supabase values in index.html.');return} sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);const {data}=await sb.auth.getSession();if(data.session)showApp(data.session.user);sb.auth.onAuthStateChange((_e,s)=>{if(s)showApp(s.user);else location.reload()})}
+async function login(){if(!sb)return msg('Configure Supabase first.');const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value,password:$('loginPass').value});msg(error?error.message:'Logged in.')}
+async function signup(){if(!sb)return msg('Configure Supabase first.');const {error}=await sb.auth.signUp({email:$('loginEmail').value,password:$('loginPass').value});msg(error?error.message:'Account created. Check email if confirmation is enabled, then login.')}
+function showApp(u){user=u;$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userEmail').textContent=u.email||'';loadSlips()}
+function openModal(id=null){editingId=id; $('modalTitle').textContent=id?'Edit Payment Slip':'New Payment Slip'; if(id){loadOne(id)}else{setForm({bank:'Meezan Bank Bhalwal',title:'',acct:'',date:new Date().toISOString().slice(0,10),plabel:'Previous Balance',prev:'',advance:'',rows:[{v:'',p:'Gutka',gp:'',nw:'',pw:'',rate:''}]})};$('modal').classList.add('show')}
+async function loadOne(id){const {data,error}=await sb.from('payment_slips').select('*').eq('id',id).single();if(error)return alert(error.message);setForm({bank:data.bank,title:data.title,acct:data.acct,date:data.date,plabel:data.plabel,prev:data.prev,advance:data.advance_payment,rows:data.rows||[]});}
+function setForm(d){$('fBank').value=d.bank||'';$('fTitle').value=d.title||'';$('fAcct').value=d.acct||'';$('fDate').value=d.date||'';$('fPlabel').value=d.plabel||'Previous Balance';$('fPrev').value=d.prev||'';$('fAdvance').value=d.advance||'';rows=d.rows||[];drawRows();calcForm()}
+function drawRows(){const box=$('rowList');box.innerHTML='';rows.forEach((r,i)=>{const d=document.createElement('div');d.className='rowitem';['v','p','gp','nw','pw','rate'].forEach(k=>{const inp=document.createElement('input');inp.value=r[k]||'';inp.placeholder=k.toUpperCase();inp.oninput=()=>{r[k]=inp.value;calcForm()};d.appendChild(inp)});const a=document.createElement('b');a.textContent=fmt(num(r.pw)*num(r.rate));d.appendChild(a);const x=document.createElement('button');x.className='btn small';x.textContent='×';x.onclick=()=>{rows.splice(i,1);drawRows();calcForm()};d.appendChild(x);box.appendChild(d)})}
+function calcForm(){const amount=rows.reduce((s,r)=>s+Math.round(num(r.pw)*num(r.rate)),0),prev=num($('fPrev').value),adv=num($('fAdvance').value);$('fAmount').textContent=fmt(amount);$('fPrevShow').textContent=fmt(prev);$('fTotal').textContent=fmt(amount+prev-adv)}
+async function saveSlip(){const payload={owner_id:user.id,bank:$('fBank').value.trim(),title:$('fTitle').value.trim(),acct:$('fAcct').value.trim(),date:$('fDate').value,plabel:$('fPlabel').value.trim(),prev:String(num($('fPrev').value)),advance_payment:String(num($('fAdvance').value)),rows};$('saveMsg').textContent='Saving...';let res;if(editingId)res=await sb.from('payment_slips').update(payload).eq('id',editingId);else res=await sb.from('payment_slips').insert(payload);if(res.error){$('saveMsg').textContent=res.error.message;return}$('saveMsg').textContent='Saved';$('modal').classList.remove('show');loadSlips()}
+async function loadSlips(){if(!user)return;const {data,error}=await sb.from('payment_slips').select('*').order('date',{ascending:false}).order('created_at',{ascending:false});if(error){$('slipTable').innerHTML='<tr><td colspan="8">'+error.message+'</td></tr>';return}window.allSlips=data||[];render()}
+function render(){const q=$('search').value.toLowerCase(),fd=$('fromDate').value,td=$('toDate').value;let list=window.allSlips.filter(s=>(!q||[s.title,s.bank,s.acct,s.date].join(' ').toLowerCase().includes(q))&&(!fd||s.date>=fd)&&(!td||s.date<=td));$('kSlips').textContent=window.allSlips.length;$('kAmount').textContent=fmt(window.allSlips.reduce((a,s)=>a+(s.rows||[]).reduce((x,r)=>x+Math.round(num(r.pw)*num(r.rate)),0),0));$('kPrev').textContent=fmt(window.allSlips.reduce((a,s)=>a+num(s.prev),0));$('kAdvance').textContent=fmt(window.allSlips.reduce((a,s)=>a+num(s.advance_payment),0));const tb=$('slipTable');tb.innerHTML='';list.forEach(s=>{const amount=(s.rows||[]).reduce((x,r)=>x+Math.round(num(r.pw)*num(r.rate)),0),pay=amount+num(s.prev)-num(s.advance_payment);const tr=document.createElement('tr');tr.innerHTML=`<td>${s.date||''}</td><td><b>${esc(s.title)}</b></td><td>${esc(s.bank)}</td><td>${fmt(amount)}</td><td>${fmt(num(s.prev))}</td><td style="color:#dc2626;font-weight:800">${fmt(num(s.advance_payment))}</td><td><b>${fmt(pay)}</b></td><td><button class="btn small" onclick="openModal('${s.id}')">Edit</button> <button class="btn small danger" onclick="delSlip('${s.id}')">Delete</button></td>`;tb.appendChild(tr)});$('empty').classList.toggle('hidden',list.length>0)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+async function delSlip(id){if(!confirm('Delete this slip?'))return;const {error}=await sb.from('payment_slips').delete().eq('id',id);if(error)alert(error.message);else loadSlips()}
+$('loginBtn').onclick=login;$('signupBtn').onclick=signup;$('newBtn').onclick=()=>openModal();$('navNew').onclick=()=>openModal();$('cancelModal').onclick=()=>$('modal').classList.remove('show');$('saveSlip').onclick=saveSlip;$('addRow').onclick=()=>{rows.push({v:'',p:'Gutka',gp:'',nw:'',pw:'',rate:''});drawRows();calcForm()};['fPrev','fAdvance'].forEach(id=>$(id).oninput=calcForm);['search','fromDate','toDate'].forEach(id=>$(id).oninput=render);$('clearFilters').onclick=()=>{$('search').value='';$('fromDate').value='';$('toDate').value='';render()};$('logoutBtn').onclick=()=>sb.auth.signOut();$('navSlips').onclick=()=>loadSlips();
+init();
 </script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script></body>
-</html>
+</body></html>
