@@ -81,6 +81,16 @@ th.am{text-align:right;padding-right:28px}td.am{padding-right:28px!important;whi
 .ln .sl{flex:1;padding:1px 2px}.ln .sv{flex:none;width:130px;text-align:right;padding:1px 2px}.ln .v,.ln .lb{padding:1px 2px}
 .cb{display:inline-flex;align-items:center;gap:6px;background:#dfe4f5;color:#1b2a6b;border-radius:8px;padding:6px 11px;font-size:14px;font-weight:600;cursor:pointer}.cb input{width:28px;height:22px;border:0;padding:0;background:none;cursor:pointer}
 .swr{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}.sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #9aa3c7;padding:0}
+.p .dd,.p .xr{position:relative}
+.p .dd .lx,.p .xr .lx{position:absolute;right:-32px;top:50%;transform:translateY(-50%);margin:0}
+.p .dd input{padding:0}.p .dd input:first-child{flex:1;min-width:0}.p .dd .r{width:160px;flex:none;text-align:right;padding:0}
+.p .xr .v{width:160px;flex:none;padding:0;text-align:right}
+.p .dd,.p .py,.p .xr{padding-right:0}
+.p .dd .r,.p .xr .v,.p .py>span:last-child{width:33.333%;flex:none;text-align:center;padding:0}
+.p .dd,.p .py,.p .xr{padding-right:0}
+.p .dd .r,.p .xr .v,.p .py [data-c]{display:block;width:33.333%;flex:none;text-align:center;padding:0}
+.q td input.r{text-align:center}
+.p .pd{justify-content:center}.p .pd input.dc{width:100%;text-align:center;font-size:19px}
 body.cap .no-pdf,body.cap .z{display:none!important}
 @media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
@@ -107,12 +117,13 @@ body.cap .no-pdf,body.cap .z{display:none!important}
 var KEY='payment-slips-v1';
 var DEF={
  m:function(){return{t:'m',bank:'Meezan Bank Bhalwal',date:'7-Oct-26',name:'Muhammad Rizwan',iban:'PK32 MEZN 0098 4501 0347 0976',rows:[{v:'E-2968',p:'Gutka',gp:'12',nw:'265.375',pw:'265.375',rate:'610'}],pl:'Previous Balance 6-10-2026',prev:'1931699',al:'Advance Payment',adv:'800000'}},
- p:function(){return{t:'p',title:'Mashallah RM Party Bill Required',d1:'21-Sep-26',d2:'To 30-Sep-2026',nw:'49.875',rate:'2000',dl:'Agreement Deduction',ded:'5000',at:'Ghulam Shabeer',an:'PK32BPUN6020305201800011',bk:'Bank Of Punjab'}},
- g:function(){return{t:'g',title:'Ali Wali Petroleum',per:'1-09-26 To 20-09-26',bank:'UBL Bank',name:'Arif Iqbal',iban:'PK26 UNIL 0112 0982 3710 3348',amt:'550741'}}
+ p:function(){return{t:'p',title:'Mashallah RM Party Bill Required',d1:'21-Sep-26 To 30-Sep-26',d2:'',nw:'49.875',rate:'2000',dl:'Agreement Deduction',ded:'5000',at:'Ghulam Shabeer',an:'PK32BPUN6020305201800011',bk:'Bank Of Punjab'}},
+ g:function(){return{t:'g',title:'Al Wali Petroleum',per:'',bank:'UBL Bank',name:'Arif Iqbal',iban:'PK26 UNIL 0112 0982 3710 3348',amt:'550741'}}
 };
 function start(){var a=DEF.p();a.title='Abbas RM Party Jalyki Bill Required';a.nw='82.875';a.ded='0';a.at='Abbas Ali';a.an='PK69ABPA0010060496100013';a.bk='Allied Bank';return[DEF.m(),DEF.p(),a,DEF.g()]}
 var bills;try{bills=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){bills=null}
 if(!bills||!bills.length)bills=start();
+bills.forEach(function(b){if(b.t==='p'&&b.d2){b.d1=(b.d1+' '+b.d2).replace('30-Sep-2026','30-Sep-26');b.d2=''}if(b.title==='Ali Wali Petroleum')b.title='Al Wali Petroleum';if(b.t==='g'&&b.per==='1-09-26 To 20-09-26')b.per=''});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(bills))}catch(e){}}
 function num(s){var n=parseFloat(String(s==null?'':s).replace(/,/g,''));return isNaN(n)?0:n}
 function fmt(n){return Math.round(n).toLocaleString('en-US')}
@@ -152,15 +163,15 @@ function card(b){
  }
  if(b.t==='p'){
   var ab=LN(b,'at','ar','<b>Account Title</b>'+I(b,'at'))+LN(b,'an','ar','<b>Account No</b>'+I(b,'an'))+LN(b,'bk','ar','<b>Bank</b>'+I(b,'bk'));
-  return '<div class="card p"><div class="ph">'+I(b,'title','pt')+'<div class="pd">'+I(b,'d1')+I(b,'d2','r')+'</div></div><div class="pb">'+
+  return '<div class="card p"><div class="ph">'+I(b,'title','pt')+'<div class="pd">'+I(b,'d1','dc')+'</div></div><div class="pb">'+
   '<div class="st"><div><small>N/W (M)</small>'+I(b,'nw')+'</div><div><small>Rate/M</small>'+I(b,'rate')+'</div><div><small>Bill Payment</small><b data-c="bill"></b></div></div>'+
   LN(b,'ded','dd',I(b,'dl')+I(b,'ded','r',1))+XL(b,'xr')+'<div class="py"><span>Payable Payment</span><span data-c="pay"></span></div>'+
   LN(b,'pill','pill','PAYMENT ONLINE REQUIRED')+(ab?'<div class="ab">'+ab+'</div>':'')+'</div></div>';
  }
  var ga=LN(b,'name','lr',I(b,'name','n1'))+LN(b,'bank','lr',I(b,'bank','n2'))+LN(b,'iban','lr',I(b,'iban','n3'));
- return '<div class="card q"><div class="gh">'+I(b,'title','gt')+'<div><small>Bill Period</small>'+I(b,'per','r')+'</div></div>'+
+ return '<div class="card q"><div class="gh">'+I(b,'title','gt')+'</div>'+
   (ga?'<div class="ga"><small>Account Details</small>'+ga+'</div>':'')+
-  '<table><tr><th>Description</th><th>Period</th><th>Amount</th></tr><tr><td>Bill Payment</td><td data-c="per"></td><td><input data-k="amt" data-n="1" class="r" value="'+esc(fmt(num(b.amt)))+'"></td></tr></table>'+
+  '<table><tr><th>Description</th><th>Period</th><th>Amount</th></tr><tr><td>Bill Payment</td><td>'+I(b,'per')+'</td><td><input data-k="amt" data-n="1" class="r" value="'+esc(fmt(num(b.amt)))+'"></td></tr></table>'+
   '<div class="sm"><div class="in">'+XL(b,'ln')+'<div class="tot"><span>Payable Balance</span><span data-c="pay"></span></div></div></div></div>';
 }
 function setc(w,n,v){var e=w.querySelector('[data-c="'+n+'"]');if(e)e.textContent=v}
@@ -225,12 +236,14 @@ async function makePDF(idx){
  }catch(err){alert('PDF error. Use Print and choose Save as PDF.')}
  document.body.classList.remove('cap');
 }
+function withBg(cv){var W=1600,p=53,iw=W-2*p,ih=Math.round(cv.height*iw/cv.width),o=document.createElement('canvas');o.width=W;o.height=ih+2*p;
+ var x=o.getContext('2d');x.fillStyle='#ebeef5';x.fillRect(0,0,o.width,o.height);x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cv,p,p,iw,ih);return o}
 async function slipCopy(i){
  if(!window.html2canvas){alert('Library did not load.');return}
  document.body.classList.add('cap');
  try{
-  var cv=await html2canvas(L.children[i].querySelector('.card'),{scale:2,backgroundColor:'#e9edf7',onclone:function(d){d.querySelectorAll('.scroll').forEach(function(x){x.style.overflow='visible'})}});
-  var blob=await new Promise(function(r){cv.toBlob(r,'image/png')});
+  var cv=await html2canvas(L.children[i].querySelector('.card'),{scale:2,backgroundColor:null,onclone:function(d){d.querySelectorAll('.scroll').forEach(function(x){x.style.overflow='visible'})}});
+  cv=withBg(cv);var blob=await new Promise(function(r){cv.toBlob(r,'image/png')});
   try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);alert('Slip copied. You can paste it in WhatsApp or anywhere.')}
   catch(e){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='slip-'+(i+1)+'.png';a.click();alert('Clipboard not allowed here, so the slip was saved as an image instead.')}
  }catch(err){alert('Could not copy the slip.')}
@@ -238,7 +251,7 @@ async function slipCopy(i){
 }
 var FLD={
  m:[['bank','Bank name'],['date','Date'],['name','Account holder name'],['iban','Account / IBAN no.'],['v','Vehicle'],['p','Product'],['gp','GP'],['nw','N/W (M)'],['pw','P/W (M)'],['rate','Rate'],['pl','Previous balance label'],['prev','Previous balance amount'],['adv','Advance payment']],
- p:[['title','Slip title (e.g. Ali RM Party Bill Required)'],['d1','From date'],['d2','To date'],['nw','N/W (M)'],['rate','Rate/M'],['dl','Deduction label'],['ded','Deduction amount'],['at','Account title'],['an','Account no.'],['bk','Bank']],
+ p:[['title','Slip title (e.g. Ali RM Party Bill Required)'],['d1','Dates (e.g. 21-Sep-26 To 30-Sep-26)'],['nw','N/W (M)'],['rate','Rate/M'],['dl','Deduction label'],['ded','Deduction amount'],['at','Account title'],['an','Account no.'],['bk','Bank']],
  g:[['title','Party / company name'],['per','Bill period (e.g. 1-09-26 To 20-09-26)'],['bank','Bank'],['name','Account name'],['iban','Account no.'],['amt','Bill payment amount']]};
 function today(){var d=new Date(),m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return d.getDate()+'-'+m[d.getMonth()]+'-'+String(d.getFullYear()).slice(2)}
 function buildForm(){
