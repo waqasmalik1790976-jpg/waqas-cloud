@@ -35,7 +35,7 @@ td{padding:6px 4px;border-bottom:1px solid #e3e6f2;text-align:center}
 td input{width:100%;text-align:center;font-size:18px;font-weight:600;padding:8px 2px}
 td.am{text-align:right;font-weight:700;font-size:18px;padding-right:14px}
 td.x button{background:#e3e7f5;color:#c0392b;padding:2px 8px}
-.sm{display:flex;justify-content:flex-end;padding:18px 28px 26px}.sm .in{width:56%}
+.sm{display:flex;justify-content:flex-end;padding:18px 28px 26px}.sm .in{width:76%}
 .ln{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dfe2ef;padding:10px 0;font-size:19px;font-weight:600;color:#6a73a3}
 .ln input{font-size:19px;font-weight:600}.ln .lb{color:#6a73a3;width:62%}.ln .v{width:36%;color:#1b2a6b}
 .tot{margin-top:14px;background:var(--a,#1c2b6b);color:var(--tg,#ffe08a);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;font-size:25px;font-weight:700}
@@ -91,6 +91,7 @@ th.am{text-align:right;padding-right:28px}td.am{padding-right:28px!important;whi
 .p .dd .r,.p .xr .v,.p .py [data-c]{display:block;width:33.333%;flex:none;text-align:center;padding:0}
 .q td input.r{text-align:center}
 .p .pd{justify-content:center}.p .pd input.dc{width:100%;text-align:center;font-size:19px}
+.sm .tot{white-space:nowrap;gap:16px}
 body.cap .no-pdf,body.cap .z{display:none!important}
 @media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
@@ -213,7 +214,7 @@ L.addEventListener('click',function(e){
  else if(act==='addx'){(b.extra=b.extra||[]).push({l:'',a:'',m:'+'})}
  else if(act==='xsign'){var x=b.extra[+e.target.closest('[data-xi]').dataset.xi];x.m=x.m==='+'?'-':x.m==='-'?'0':'+'}
  else if(act==='xdel'){b.extra.splice(+e.target.closest('[data-xi]').dataset.xi,1)}
- else if(act==='scopy'){slipCopy(i);return}
+ else if(act==='scopy'){slipCopy(i,e.target);return}
  else if(act==='del'){if(!confirm('Delete this slip?'))return;bills.splice(i,1)}
  else if(act==='pdf'){makePDF([i]);return}
  save();render();
@@ -238,14 +239,15 @@ async function makePDF(idx){
 }
 function withBg(cv){var W=1600,p=53,iw=W-2*p,ih=Math.round(cv.height*iw/cv.width),o=document.createElement('canvas');o.width=W;o.height=ih+2*p;
  var x=o.getContext('2d');x.fillStyle='#ebeef5';x.fillRect(0,0,o.width,o.height);x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cv,p,p,iw,ih);return o}
-async function slipCopy(i){
+function flash(b,t){if(!b)return;var o=b.textContent;b.textContent=t;setTimeout(function(){b.textContent=o},1500)}
+async function slipCopy(i,btn){
  if(!window.html2canvas){alert('Library did not load.');return}
  document.body.classList.add('cap');
  try{
   var cv=await html2canvas(L.children[i].querySelector('.card'),{scale:2,backgroundColor:null,onclone:function(d){d.querySelectorAll('.scroll').forEach(function(x){x.style.overflow='visible'})}});
   cv=withBg(cv);var blob=await new Promise(function(r){cv.toBlob(r,'image/png')});
-  try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);alert('Slip copied. You can paste it in WhatsApp or anywhere.')}
-  catch(e){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='slip-'+(i+1)+'.png';a.click();alert('Clipboard not allowed here, so the slip was saved as an image instead.')}
+  try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);flash(btn,'\u2713 Copied')}
+  catch(e){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='slip-'+(i+1)+'.png';a.click();flash(btn,'\u2713 Saved')}
  }catch(err){alert('Could not copy the slip.')}
  document.body.classList.remove('cap');
 }
