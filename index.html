@@ -1,52 +1,211 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Payment Slip Manager</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Payment Slips</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--main:#1b2a6b;--accent:#c9a227;--bg:#eef1f8;--card:rgba(255,255,255,.86);--text:#18213b;--muted:#6b749a;--danger:#dc2626;--red:#dc2626}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef1f8,#e7ebf5);font-family:Segoe UI,Arial,sans-serif;color:var(--text)}button,input,select{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.side{background:rgba(255,255,255,.82);backdrop-filter:blur(18px);border-right:1px solid #d9deeb;padding:20px;position:sticky;top:0;height:100vh}.brand{font-weight:800;font-size:21px;color:var(--main);margin-bottom:25px}.nav button{width:100%;padding:12px;border:0;background:transparent;text-align:left;border-radius:10px;margin:4px 0;cursor:pointer;color:var(--text)}.nav button.active,.nav button:hover{background:#e9edf8;color:var(--main);font-weight:700}.main{padding:24px;max-width:1400px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.title h1{margin:0;font-size:28px}.title p{margin:5px 0;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #cfd6e6;background:white;padding:10px 14px;border-radius:10px;cursor:pointer}.primary{background:var(--main);color:white;border-color:var(--main)}.gold{background:var(--accent);border-color:var(--accent);font-weight:700}.danger{color:#fff;background:var(--danger);border-color:var(--danger)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.card{background:var(--card);backdrop-filter:blur(16px);border:1px solid rgba(205,212,230,.8);border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(30,45,90,.08)}.k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:800;margin-top:5px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select,.form input,.form textarea{border:1px solid #cfd6e6;background:#fff;border-radius:10px;padding:10px 12px;outline:none}.toolbar input{flex:1;min-width:220px}.tablewrap{overflow:auto}.tbl{width:100%;border-collapse:collapse;min-width:780px}.tbl th{background:var(--main);color:white;padding:12px;text-align:left}.tbl td{padding:12px;border-bottom:1px solid #e4e8f1}.tbl tr:hover{background:#f5f7fb}.small{padding:7px 10px;font-size:13px}.empty{text-align:center;padding:35px;color:var(--muted)}.modal{position:fixed;inset:0;background:rgba(10,18,40,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.show{display:flex}.dialog{width:min(1050px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 25px 70px rgba(0,0,0,.25);padding:20px}.dialog h2{margin:0 0 15px}.formgrid{display:grid;grid-template-columns:2fr 1fr;gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input{width:100%}.rows{margin-top:15px}.rowhead,.rowitem{display:grid;grid-template-columns:1.1fr 1.1fr .6fr .9fr .9fr .8fr 1fr 34px;gap:6px;align-items:center}.rowhead{font-size:12px;font-weight:700;color:var(--muted);padding:7px}.rowitem{margin-bottom:6px}.rowitem input{width:100%;padding:8px;border:1px solid #d3d9e6;border-radius:8px}.summary{margin:16px 0 0 auto;width:min(520px,100%);background:#f5f6fb;padding:14px;border-radius:12px}.sumline{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e5ee}.prev{color:#6b749a}.advance{color:#dc2626;font-weight:800}.total{display:flex;justify-content:space-between;background:var(--main);color:#ffe08a;padding:13px;border-radius:10px;margin-top:10px;font-size:20px;font-weight:800}.modalbar{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.status{font-size:13px;color:var(--muted);margin-top:10px}.login{max-width:440px;margin:10vh auto}.login h1{margin-top:0}.hidden{display:none!important}@media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:relative;border-right:0;border-bottom:1px solid #d9deeb}.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}}@media(max-width:560px){.main{padding:14px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.rowhead{display:none}.rowitem{grid-template-columns:1fr 1fr}.side{padding:14px}.nav{display:flex;gap:6px}.nav button{width:auto}}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#e9edf7;--tx:#1b2a6b;--bar:#fff;--bd:#cfd6ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10142a;--tx:#e6e9f7;--bar:#1a2040;--bd:#2d3560}}
+:root[data-theme="dark"]{--bg:#10142a;--tx:#e6e9f7;--bar:#1a2040;--bd:#2d3560}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",system-ui,Arial,sans-serif;padding:12px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:8px;background:var(--bar);border:1px solid var(--bd);border-radius:12px;padding:10px;margin-bottom:14px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:8px 13px;cursor:pointer;background:#3a4fb5;color:#fff}
+button.g{background:#c9a227;color:#1b2a6b}button.r{background:#c0392b}button.s{background:#dfe4f5;color:#1b2a6b}
+.wrap{max-width:820px;margin:0 auto 26px}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;align-items:center}
+.tools button{padding:6px 11px;font-size:14px}
+.scroll{overflow-x:auto}
+.card{min-width:720px;overflow:hidden;color:#1b2a6b}
+.card input{font-family:inherit;border:0;outline:0;background:transparent;color:inherit;min-width:0}
+.card .r{text-align:right}
+/* bank slip */
+.m{background:#f4f5fb;border-radius:16px;border:1px solid #d8dcec;border-top:12px solid #c9a227}
+.m .hd{background:#1c2b6b;color:#fff;padding:22px 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+.m .bank{font-size:30px;font-weight:700;width:100%}.m .dl{font-size:13px;color:#cdd3f0;text-align:right}.m .date{font-size:24px;font-weight:700;width:170px}
+.m .ac{background:#fff;padding:16px 28px}.m .ac small{color:#6a73a3;font-size:14px}.m .ac input{display:block;width:100%}
+.m .nm{font-size:22px;font-weight:700;margin:4px 0}.m .ib{font-size:22px;font-weight:700;color:#6a73a3}
+table{width:100%;border-collapse:collapse;background:#fff}
+th{background:#3a4fb5;color:#fff;padding:12px 6px;font-size:16px}
+td{padding:6px 4px;border-bottom:1px solid #e3e6f2;text-align:center}
+td input{width:100%;text-align:center;font-size:18px;font-weight:600;padding:8px 2px}
+td.am{text-align:right;font-weight:700;font-size:18px;padding-right:14px}
+td.x button{background:#e3e7f5;color:#c0392b;padding:2px 8px}
+.sm{display:flex;justify-content:flex-end;padding:18px 28px 26px}.sm .in{width:56%}
+.ln{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dfe2ef;padding:10px 0;font-size:19px;font-weight:600;color:#6a73a3}
+.ln input{font-size:19px;font-weight:600}.ln .lb{color:#6a73a3;width:62%}.ln .v{width:36%;color:#1b2a6b}
+.tot{margin-top:14px;background:#1c2b6b;color:#ffe08a;border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;font-size:25px;font-weight:700}
+/* party slip */
+.p{background:linear-gradient(135deg,#d7efec,#e6eef6 50%,#cfe3f4);border-radius:40px;padding:0 0 22px}
+.p .ph{background:#169c93;color:#fff;padding:22px 30px 14px}
+.p .pt{display:block;width:100%;text-align:center;font-size:30px;font-weight:700}
+.p .pd{display:flex;justify-content:space-between;margin-top:12px;font-weight:700}.p .pd input{font-size:17px;font-weight:700;width:48%}
+.p .pb{padding:18px 34px 0}
+.p .st{display:flex;background:#fff;border-radius:18px;padding:12px 0;text-align:center}
+.p .st>div{flex:1;border-left:2px solid #8d98ab}.p .st>div:first-child{border:0}
+.p small{display:block;font-weight:700;font-size:17px;color:#1f2d4d}.p .st input,.p .st b{font-size:22px;font-weight:700;text-align:center;width:100%;display:block;color:#10243f;padding:3px 0}
+.p .dd{display:flex;justify-content:space-between;background:#b22226;color:#fff;border-radius:16px;padding:14px 20px;margin-top:14px;font-size:20px;font-weight:700}
+.p .dd input{font-size:20px;font-weight:700;color:#fff}.p .dd .r{width:35%}
+.p .py{display:flex;justify-content:space-between;background:#dbeac0;color:#12300f;border-radius:16px;padding:14px 20px;margin-top:12px;font-size:23px;font-weight:700}
+.p .pill{width:max-content;margin:18px auto;border:2px solid #0b7eb0;color:#0b7eb0;border-radius:30px;padding:8px 26px;background:#fff;font-weight:700;font-size:19px}
+.p .ab{background:#fff;border-radius:18px;padding:14px 18px}.p .ab div{display:flex;align-items:center;padding:3px 0;font-size:18px}
+.p .ab b{width:170px;color:#1f2d4d}.p .ab input{flex:1;font-size:18px;color:#2b3550}
+.ft{text-align:center;color:#6b7790;font-size:13px;margin-top:20px}
+/* petrol slip */
+.q{background:#f4f5fb;border-radius:24px;border:1px solid #d8dcec;border-top:14px solid #c9a227}
+.q .gh{background:#1c2b6b;color:#fff;padding:26px 30px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+.q .gt{font-size:36px;font-weight:700;width:100%}.q .gh small{display:block;text-align:right;color:#cdd3f0}.q .gh .r{font-size:23px;font-weight:700;width:260px}
+.q .ga{background:#fff;padding:16px 30px}.q .ga small{color:#6a73a3}.q .ga input{display:block;width:100%}
+.q .n1{font-size:28px;font-weight:700}.q .n2{font-size:20px;font-weight:700}.q .n3{font-size:23px;font-weight:700;color:#6a73a3}
+.q td{font-size:20px;font-weight:600;padding:20px 8px}.q td input{font-size:20px}
+.gen{background:var(--bar);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:0 auto 14px;max-width:820px}
+.gen[hidden]{display:none}.gen h3{margin:0 0 10px}.gg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.gen label{font-size:13px;font-weight:600;display:block}
+.gen input,.gen select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;font:inherit;background:var(--bg);color:var(--tx);margin-top:3px}
+.gen .ar{display:flex;gap:8px;flex-wrap:wrap}
+.dupr{display:flex;gap:8px;margin-top:8px}.dupr button{flex:1;padding:11px;font-size:16px}
+body.cap .no-pdf,body.cap .z{display:none!important}
+@media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
 </head>
 <body>
-<div id="loginView" class="login card">
-<h1>💳 Payment Slip Manager</h1><p class="k">Option B: Supabase online database. Your slips stay online and can grow with your records.</p>
-<div class="form"><div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div><div class="field" style="margin-top:10px"><label>Password</label><input id="loginPass" type="password" placeholder="Password"></div></div>
-<div class="actions" style="margin-top:14px"><button class="btn primary" id="loginBtn">Login</button><button class="btn" id="signupBtn">Create account</button></div><div id="loginMsg" class="status"></div>
+<div class="top">
+  <button class="g" id="genBtn">✨ New Slip Generator</button>
+  
+  
+  
+  
+  <button class="s" id="prt">Print</button>
+  <button class="r" id="rst">Reset</button>
 </div>
-<div id="appView" class="app hidden">
-<aside class="side"><div class="brand">💳 Payment Slip</div><div class="nav"><button class="active" id="navSlips">📋 All Slips</button><button id="navNew">➕ New Slip</button><button id="navSettings">⚙️ Settings</button></div><div class="status" style="margin-top:25px">Online database<br><span id="userEmail"></span></div><button class="btn" style="margin-top:14px;width:100%" id="logoutBtn">Logout</button></aside>
-<main class="main"><div class="top"><div class="title"><h1>Payment Slips</h1><p>Unlimited records in one web app — create, search, edit and print.</p></div><div class="actions"><button class="btn gold" id="newBtn">+ New Payment Slip</button></div></div>
-<div class="grid"><div class="card"><div class="k">Total Slips</div><div class="v" id="kSlips">0</div></div><div class="card"><div class="k">Total Amount</div><div class="v" id="kAmount">0</div></div><div class="card"><div class="k">Total Previous Balance</div><div class="v" id="kPrev">0</div></div><div class="card"><div class="k">Total Advance</div><div class="v" id="kAdvance">0</div></div></div>
-<div class="card"><div class="toolbar"><input id="search" placeholder="🔎 Search name, bank, account or date..."><input id="fromDate" type="date"><input id="toDate" type="date"><button class="btn" id="clearFilters">Clear</button></div><div class="tablewrap"><table class="tbl"><thead><tr><th>Date</th><th>Account / Person</th><th>Bank</th><th>Amount</th><th>Previous</th><th>Advance</th><th>Payable</th><th>Action</th></tr></thead><tbody id="slipTable"></tbody></table><div id="empty" class="empty hidden">No slips found.</div></div></div>
-</main></div>
-<div id="modal" class="modal"><div class="dialog"><h2 id="modalTitle">New Payment Slip</h2><div class="formgrid"><div class="field"><label>Bank</label><input id="fBank"></div><div class="field"><label>Date</label><input id="fDate" type="date"></div><div class="field"><label>Account / Person</label><input id="fTitle"></div><div class="field"><label>Account Number</label><input id="fAcct"></div><div class="field"><label>Previous Balance Label</label><input id="fPlabel"></div><div class="field"><label>Previous Balance</label><input id="fPrev" inputmode="decimal"></div></div>
-<div class="rows"><div class="rowhead"><span>Vehicle</span><span>Product</span><span>GP</span><span>N/W</span><span>P/W</span><span>Rate</span><span>Amount</span><span></span></div><div id="rowList"></div><button class="btn small" id="addRow">+ Add row</button></div>
-<div class="summary"><div class="sumline"><span>Amount</span><b id="fAmount">0</b></div><div class="sumline prev"><span>Previous Balance</span><b id="fPrevShow">0</b></div><div class="sumline advance"><span>Advance Payment</span><input id="fAdvance" inputmode="decimal" style="width:180px;padding:6px 8px;border:1px solid #e3b4b4;border-radius:7px;color:#dc2626;font-weight:800"></div><div class="total"><span>Total Payable Balance</span><span id="fTotal">0</span></div></div>
-<div class="modalbar"><button class="btn" id="cancelModal">Cancel</button><button class="btn gold" id="saveSlip">Save Slip</button></div><div id="saveMsg" class="status"></div></div></div>
+<div class="gen" id="gen" hidden>
+  <h3>✨ New Slip Generator</h3>
+  <label>Slip type<select id="gt"><option value="m">Bank slip (vehicle / product table)</option><option value="p">Party slip (N/W x Rate, deduction)</option><option value="g">Petrol / simple slip (period + amount)</option></select></label>
+  <div class="gg" id="gg"></div>
+  <div class="ar"><button class="g" id="gGo">Generate slip</button><button class="s" id="gX">Cancel</button></div>
+</div>
+<div id="list"></div>
 <script>
-const SUPABASE_URL='PASTE_YOUR_SUPABASE_URL_HERE';
-const SUPABASE_ANON_KEY='PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
-let sb=null,user=null,editingId=null,rows=[];
-const $=id=>document.getElementById(id), fmt=n=>Math.round(Number(n)||0).toLocaleString('en-US'), num=v=>parseFloat(String(v??'').replace(/,/g,''))||0;
-function configured(){return SUPABASE_URL.startsWith('http')&&SUPABASE_ANON_KEY.length>30}
-function msg(t){$('loginMsg').textContent=t}
-async function init(){if(!configured()){msg('Supabase setup required: open Settings after uploading the app, or edit the two Supabase values in index.html.');return} sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);const {data}=await sb.auth.getSession();if(data.session)showApp(data.session.user);sb.auth.onAuthStateChange((_e,s)=>{if(s)showApp(s.user);else location.reload()})}
-async function login(){if(!sb)return msg('Configure Supabase first.');const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value,password:$('loginPass').value});msg(error?error.message:'Logged in.')}
-async function signup(){if(!sb)return msg('Configure Supabase first.');const {error}=await sb.auth.signUp({email:$('loginEmail').value,password:$('loginPass').value});msg(error?error.message:'Account created. Check email if confirmation is enabled, then login.')}
-function showApp(u){user=u;$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userEmail').textContent=u.email||'';loadSlips()}
-function openModal(id=null){editingId=id; $('modalTitle').textContent=id?'Edit Payment Slip':'New Payment Slip'; if(id){loadOne(id)}else{setForm({bank:'Meezan Bank Bhalwal',title:'',acct:'',date:new Date().toISOString().slice(0,10),plabel:'Previous Balance',prev:'',advance:'',rows:[{v:'',p:'Gutka',gp:'',nw:'',pw:'',rate:''}]})};$('modal').classList.add('show')}
-async function loadOne(id){const {data,error}=await sb.from('payment_slips').select('*').eq('id',id).single();if(error)return alert(error.message);setForm({bank:data.bank,title:data.title,acct:data.acct,date:data.date,plabel:data.plabel,prev:data.prev,advance:data.advance_payment,rows:data.rows||[]});}
-function setForm(d){$('fBank').value=d.bank||'';$('fTitle').value=d.title||'';$('fAcct').value=d.acct||'';$('fDate').value=d.date||'';$('fPlabel').value=d.plabel||'Previous Balance';$('fPrev').value=d.prev||'';$('fAdvance').value=d.advance||'';rows=d.rows||[];drawRows();calcForm()}
-function drawRows(){const box=$('rowList');box.innerHTML='';rows.forEach((r,i)=>{const d=document.createElement('div');d.className='rowitem';['v','p','gp','nw','pw','rate'].forEach(k=>{const inp=document.createElement('input');inp.value=r[k]||'';inp.placeholder=k.toUpperCase();inp.oninput=()=>{r[k]=inp.value;calcForm()};d.appendChild(inp)});const a=document.createElement('b');a.textContent=fmt(num(r.pw)*num(r.rate));d.appendChild(a);const x=document.createElement('button');x.className='btn small';x.textContent='×';x.onclick=()=>{rows.splice(i,1);drawRows();calcForm()};d.appendChild(x);box.appendChild(d)})}
-function calcForm(){const amount=rows.reduce((s,r)=>s+Math.round(num(r.pw)*num(r.rate)),0),prev=num($('fPrev').value),adv=num($('fAdvance').value);$('fAmount').textContent=fmt(amount);$('fPrevShow').textContent=fmt(prev);$('fTotal').textContent=fmt(amount+prev-adv)}
-async function saveSlip(){const payload={owner_id:user.id,bank:$('fBank').value.trim(),title:$('fTitle').value.trim(),acct:$('fAcct').value.trim(),date:$('fDate').value,plabel:$('fPlabel').value.trim(),prev:String(num($('fPrev').value)),advance_payment:String(num($('fAdvance').value)),rows};$('saveMsg').textContent='Saving...';let res;if(editingId)res=await sb.from('payment_slips').update(payload).eq('id',editingId);else res=await sb.from('payment_slips').insert(payload);if(res.error){$('saveMsg').textContent=res.error.message;return}$('saveMsg').textContent='Saved';$('modal').classList.remove('show');loadSlips()}
-async function loadSlips(){if(!user)return;const {data,error}=await sb.from('payment_slips').select('*').order('date',{ascending:false}).order('created_at',{ascending:false});if(error){$('slipTable').innerHTML='<tr><td colspan="8">'+error.message+'</td></tr>';return}window.allSlips=data||[];render()}
-function render(){const q=$('search').value.toLowerCase(),fd=$('fromDate').value,td=$('toDate').value;let list=window.allSlips.filter(s=>(!q||[s.title,s.bank,s.acct,s.date].join(' ').toLowerCase().includes(q))&&(!fd||s.date>=fd)&&(!td||s.date<=td));$('kSlips').textContent=window.allSlips.length;$('kAmount').textContent=fmt(window.allSlips.reduce((a,s)=>a+(s.rows||[]).reduce((x,r)=>x+Math.round(num(r.pw)*num(r.rate)),0),0));$('kPrev').textContent=fmt(window.allSlips.reduce((a,s)=>a+num(s.prev),0));$('kAdvance').textContent=fmt(window.allSlips.reduce((a,s)=>a+num(s.advance_payment),0));const tb=$('slipTable');tb.innerHTML='';list.forEach(s=>{const amount=(s.rows||[]).reduce((x,r)=>x+Math.round(num(r.pw)*num(r.rate)),0),pay=amount+num(s.prev)-num(s.advance_payment);const tr=document.createElement('tr');tr.innerHTML=`<td>${s.date||''}</td><td><b>${esc(s.title)}</b></td><td>${esc(s.bank)}</td><td>${fmt(amount)}</td><td>${fmt(num(s.prev))}</td><td style="color:#dc2626;font-weight:800">${fmt(num(s.advance_payment))}</td><td><b>${fmt(pay)}</b></td><td><button class="btn small" onclick="openModal('${s.id}')">Edit</button> <button class="btn small danger" onclick="delSlip('${s.id}')">Delete</button></td>`;tb.appendChild(tr)});$('empty').classList.toggle('hidden',list.length>0)}
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-async function delSlip(id){if(!confirm('Delete this slip?'))return;const {error}=await sb.from('payment_slips').delete().eq('id',id);if(error)alert(error.message);else loadSlips()}
-$('loginBtn').onclick=login;$('signupBtn').onclick=signup;$('newBtn').onclick=()=>openModal();$('navNew').onclick=()=>openModal();$('cancelModal').onclick=()=>$('modal').classList.remove('show');$('saveSlip').onclick=saveSlip;$('addRow').onclick=()=>{rows.push({v:'',p:'Gutka',gp:'',nw:'',pw:'',rate:''});drawRows();calcForm()};['fPrev','fAdvance'].forEach(id=>$(id).oninput=calcForm);['search','fromDate','toDate'].forEach(id=>$(id).oninput=render);$('clearFilters').onclick=()=>{$('search').value='';$('fromDate').value='';$('toDate').value='';render()};$('logoutBtn').onclick=()=>sb.auth.signOut();$('navSlips').onclick=()=>loadSlips();
-init();
+var KEY='payment-slips-v1';
+var DEF={
+ m:function(){return{t:'m',bank:'Meezan Bank Bhalwal',date:'7-Oct-26',name:'Muhammad Rizwan',iban:'PK32 MEZN 0098 4501 0347 0976',rows:[{v:'E-2968',p:'Gutka',gp:'12',nw:'265.375',pw:'265.375',rate:'610'}],pl:'Previous Balance 6-10-2026',prev:'1931699',al:'Advance Payment',adv:'800000'}},
+ p:function(){return{t:'p',title:'Mashallah RM Party Bill Required',d1:'21-Sep-26',d2:'To 30-Sep-2026',nw:'49.875',rate:'2000',dl:'Agreement Deduction',ded:'5000',at:'Ghulam Shabeer',an:'PK32BPUN6020305201800011',bk:'Bank Of Punjab'}},
+ g:function(){return{t:'g',title:'Ali Wali Petroleum',per:'1-09-26 To 20-09-26',bank:'UBL Bank',name:'Arif Iqbal',iban:'PK26 UNIL 0112 0982 3710 3348',amt:'550741'}}
+};
+function start(){var a=DEF.p();a.title='Abbas RM Party Jalyki Bill Required';a.nw='82.875';a.ded='0';a.at='Abbas Ali';a.an='PK69ABPA0010060496100013';a.bk='Allied Bank';return[DEF.m(),DEF.p(),a,DEF.g()]}
+var bills;try{bills=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){bills=null}
+if(!bills||!bills.length)bills=start();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(bills))}catch(e){}}
+function num(s){var n=parseFloat(String(s==null?'':s).replace(/,/g,''));return isNaN(n)?0:n}
+function fmt(n){return Math.round(n).toLocaleString('en-US')}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function I(b,k,cls,n){return '<input data-k="'+k+'"'+(n?' data-n="1"':'')+(cls?' class="'+cls+'"':'')+' value="'+esc(n?fmt(num(b[k])):b[k])+'">'}
+function ramt(r){return Math.round(num(r.pw||r.nw)*num(r.rate))}
+function card(b){
+ if(b.t==='m'){
+  var rows=b.rows.map(function(r,j){return '<tr data-r="'+j+'">'+['v','p','gp','nw','pw','rate'].map(function(k){return '<td><input data-k="'+k+'" value="'+esc(r[k])+'"></td>'}).join('')+'<td class="am" data-c="ra"></td><td class="x no-pdf"><button data-act="delrow">×</button></td></tr>'}).join('');
+  return '<div class="card m"><div class="hd">'+I(b,'bank','bank')+'<div><div class="dl">Date</div>'+I(b,'date','date r')+'</div></div>'+
+  '<div class="ac"><small>Account Details</small>'+I(b,'name','nm')+I(b,'iban','ib')+'</div>'+
+  '<table><tr><th>Vehicle</th><th>Product</th><th>GP</th><th>N/W (M)</th><th>P/W (M)</th><th>Rate</th><th>Amount</th><th class="no-pdf"></th></tr>'+rows+'</table>'+
+  '<div class="sm"><div class="in"><div class="ln"><span>Amount</span><span data-c="sum"></span></div>'+
+  '<div class="ln">'+I(b,'pl','lb')+I(b,'prev','v r',1)+'</div><div class="ln">'+I(b,'al','lb')+I(b,'adv','v r',1)+'</div>'+
+  '<div class="tot"><span>Total Payable Balance</span><span data-c="tot"></span></div></div></div></div>';
+ }
+ if(b.t==='p')return '<div class="card p"><div class="ph">'+I(b,'title','pt')+'<div class="pd">'+I(b,'d1')+I(b,'d2','r')+'</div></div><div class="pb">'+
+  '<div class="st"><div><small>N/W (M)</small>'+I(b,'nw')+'</div><div><small>Rate/M</small>'+I(b,'rate')+'</div><div><small>Bill Payment</small><b data-c="bill"></b></div></div>'+
+  '<div class="dd">'+I(b,'dl')+I(b,'ded','r',1)+'</div><div class="py"><span>Payable Payment</span><span data-c="pay"></span></div>'+
+  '<div class="pill">PAYMENT ONLINE REQUIRED</div><div class="ab"><div><b>Account Title</b>'+I(b,'at')+'</div><div><b>Account No</b>'+I(b,'an')+'</div><div><b>Bank</b>'+I(b,'bk')+'</div></div>'+
+  '</div></div>';
+ return '<div class="card q"><div class="gh">'+I(b,'title','gt')+'<div><small>Bill Period</small>'+I(b,'per','r')+'</div></div>'+
+  '<div class="ga"><small>Account Details</small>'+I(b,'name','n1')+I(b,'bank','n2')+I(b,'iban','n3')+'</div>'+
+  '<table><tr><th>Description</th><th>Period</th><th>Amount</th></tr><tr><td>Bill Payment</td><td data-c="per"></td><td><input data-k="amt" data-n="1" class="r" value="'+esc(fmt(num(b.amt)))+'"></td></tr></table>'+
+  '<div class="sm"><div class="in"><div class="tot"><span>Payable Balance</span><span data-c="pay"></span></div></div></div></div>';
+}
+function setc(w,n,v){var e=w.querySelector('[data-c="'+n+'"]');if(e)e.textContent=v}
+function upd(w,b){
+ if(b.t==='m'){var a=0;w.querySelectorAll('tr[data-r]').forEach(function(tr){var m=ramt(b.rows[+tr.dataset.r]);a+=m;tr.querySelector('[data-c="ra"]').textContent=fmt(m)});
+  setc(w,'sum',fmt(a));setc(w,'tot',fmt(a+num(b.prev)-num(b.adv)))}
+ else if(b.t==='p'){var bl=Math.round(num(b.nw)*num(b.rate));setc(w,'bill',fmt(bl));setc(w,'pay',fmt(bl-num(b.ded)));w.querySelector('.dd').classList.toggle('z',num(b.ded)===0)}
+ else{setc(w,'per',b.per);setc(w,'pay',fmt(num(b.amt)))}
+}
+var L=document.getElementById('list');
+function render(){
+ L.innerHTML=bills.map(function(b,i){
+  var nm={m:'Bank slip',p:'Party slip',g:'Petrol slip'}[b.t];
+  return '<div class="wrap" data-i="'+i+'"><div class="tools no-pdf">'+(b.t==='m'?'<button class="s" data-act="addrow">+ Row</button>':'')+
+  '<button class="g" data-act="copy">Duplicate</button><button class="s" data-act="scopy">Slip Copy</button></div><div class="scroll">'+card(b)+'</div></div>'}).join('');
+ Array.prototype.forEach.call(L.children,function(w,i){upd(w,bills[i])});
+}
+function bi(el){return +el.closest('.wrap').dataset.i}
+L.addEventListener('input',function(e){
+ var el=e.target,k=el.dataset.k;if(!k)return;var w=el.closest('.wrap'),b=bills[bi(el)],tr=el.closest('tr[data-r]');
+ if(tr)b.rows[+tr.dataset.r][k]=el.value;else b[k]=el.value;upd(w,b);save();
+});
+L.addEventListener('change',function(e){var el=e.target;if(el.dataset.n)el.value=fmt(num(el.value))});
+L.addEventListener('click',function(e){
+ var act=e.target.dataset.act;if(!act)return;var i=bi(e.target),b=bills[i];
+ if(act==='addrow'){var l=b.rows[b.rows.length-1]||{};b.rows.push({v:'',p:l.p||'Gutka',gp:'',nw:'',pw:'',rate:l.rate||''})}
+ else if(act==='delrow'){if(b.rows.length>1)b.rows.splice(+e.target.closest('tr').dataset.r,1)}
+ else if(act==='copy'){bills.splice(i+1,0,JSON.parse(JSON.stringify(b)))}
+ else if(act==='scopy'){slipCopy(i);return}
+ else if(act==='del'){if(!confirm('Delete this slip?'))return;bills.splice(i,1)}
+ else if(act==='pdf'){makePDF([i]);return}
+ save();render();
+});
+document.getElementById('prt').onclick=function(){window.print()};
+document.getElementById('rst').onclick=function(){if(confirm('Reset everything to the original 4 slips?')){bills=start();save();render()}};
+async function makePDF(idx){
+ if(!window.html2canvas||!window.jspdf){alert('PDF library did not load. Use Print and choose Save as PDF.');return}
+ document.body.classList.add('cap');var doc=null,W=595;
+ try{
+  for(var n=0;n<idx.length;n++){
+   var c=L.children[idx[n]].querySelector('.card');
+   var cv=await html2canvas(c,{scale:2,backgroundColor:'#e9edf7',onclone:function(d){d.querySelectorAll('.scroll').forEach(function(s){s.style.overflow='visible'})}});
+   var H=W*cv.height/cv.width;
+   if(!doc)doc=new jspdf.jsPDF({unit:'pt',format:[W,H]});else doc.addPage([W,H]);
+   doc.addImage(cv.toDataURL('image/jpeg',0.95),'JPEG',0,0,W,H);
+  }
+  doc.save('Payment-Slips.pdf');
+ }catch(err){alert('PDF error. Use Print and choose Save as PDF.')}
+ document.body.classList.remove('cap');
+}
+async function slipCopy(i){
+ if(!window.html2canvas){alert('Library did not load.');return}
+ document.body.classList.add('cap');
+ try{
+  var cv=await html2canvas(L.children[i].querySelector('.card'),{scale:2,backgroundColor:'#e9edf7',onclone:function(d){d.querySelectorAll('.scroll').forEach(function(x){x.style.overflow='visible'})}});
+  var blob=await new Promise(function(r){cv.toBlob(r,'image/png')});
+  try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);alert('Slip copied. You can paste it in WhatsApp or anywhere.')}
+  catch(e){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='slip-'+(i+1)+'.png';a.click();alert('Clipboard not allowed here, so the slip was saved as an image instead.')}
+ }catch(err){alert('Could not copy the slip.')}
+ document.body.classList.remove('cap');
+}
+var FLD={
+ m:[['bank','Bank name'],['date','Date'],['name','Account holder name'],['iban','Account / IBAN no.'],['v','Vehicle'],['p','Product'],['gp','GP'],['nw','N/W (M)'],['pw','P/W (M)'],['rate','Rate'],['pl','Previous balance label'],['prev','Previous balance amount'],['adv','Advance payment']],
+ p:[['title','Slip title (e.g. Ali RM Party Bill Required)'],['d1','From date'],['d2','To date'],['nw','N/W (M)'],['rate','Rate/M'],['dl','Deduction label'],['ded','Deduction amount'],['at','Account title'],['an','Account no.'],['bk','Bank']],
+ g:[['title','Party / company name'],['per','Bill period (e.g. 1-09-26 To 20-09-26)'],['bank','Bank'],['name','Account name'],['iban','Account no.'],['amt','Bill payment amount']]};
+function today(){var d=new Date(),m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return d.getDate()+'-'+m[d.getMonth()]+'-'+String(d.getFullYear()).slice(2)}
+function buildForm(){
+ var PRE={date:today(),d1:today(),pl:'Previous Balance',dl:'Agreement Deduction'};
+ document.getElementById('gg').innerHTML=FLD[document.getElementById('gt').value].map(function(f){return '<label>'+f[1]+'<input data-f="'+f[0]+'" value="'+esc(PRE[f[0]]||'')+'"></label>'}).join('');
+}
+var G=document.getElementById('gen');
+document.getElementById('genBtn').onclick=function(){G.hidden=!G.hidden;if(!G.hidden){buildForm();G.scrollIntoView({behavior:'smooth'})}};
+document.getElementById('gt').onchange=buildForm;
+document.getElementById('gX').onclick=function(){G.hidden=true};
+document.getElementById('gGo').onclick=function(){
+ var t=document.getElementById('gt').value,o=DEF[t](),v={};
+ document.querySelectorAll('#gg [data-f]').forEach(function(i){v[i.dataset.f]=i.value.trim()});
+ if(t==='m'){o.rows=[{v:v.v||'',p:v.p||'',gp:v.gp||'',nw:v.nw||'',pw:v.pw||v.nw||'',rate:v.rate||''}];
+  ['bank','date','name','iban','pl'].forEach(function(k){o[k]=v[k]||''});o.prev=v.prev||'0';o.adv=v.adv||'0';o.al='Advance Payment'}
+ else Object.keys(o).forEach(function(k){if(k!=='t')o[k]=v[k]||((k==='ded'||k==='amt')?'0':'')});
+ bills.push(o);save();render();G.hidden=true;L.lastElementChild.scrollIntoView({behavior:'smooth'});
+};
+render();
 </script>
-</body></html>
+</body>
+</html>
