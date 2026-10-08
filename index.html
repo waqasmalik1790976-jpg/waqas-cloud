@@ -72,6 +72,11 @@ td.x button{background:#e3e7f5;color:#c0392b;padding:2px 8px}
 .p .xr{display:flex;align-items:center;background:#fff;border-radius:16px;padding:10px 20px;margin-top:12px;font-size:20px;font-weight:700;color:#1f2d4d}
 .xr .lb{flex:1;font-size:20px;font-weight:700}.xr .v{width:30%;font-size:20px;font-weight:700}.ln .lb{min-width:0}
 .sg{flex:none;background:#dfe4f5;color:#1b2a6b;padding:0 10px;font-size:16px;line-height:22px;border-radius:6px;margin:0 6px}.sp{font-weight:700;margin-right:2px}
+#list{display:grid;grid-template-columns:repeat(var(--c,2),minmax(0,1fr));gap:18px;align-items:start;justify-items:start;overflow:visible;padding:2px 2px 16px}
+#list .wrap{flex:none;width:780px;max-width:none;margin:0;zoom:var(--z,1)}
+body.cap #list .wrap{zoom:1!important}
+@media print{#list{display:block;overflow:visible}#list .wrap{width:auto;margin-bottom:20px;zoom:1}}
+.ln .v{color:#6a73a3!important;width:130px}.ln .lb{flex:1;width:auto;min-width:0}
 body.cap .no-pdf,body.cap .z{display:none!important}
 @media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
@@ -83,6 +88,7 @@ body.cap .no-pdf,body.cap .z{display:none!important}
   
   
   
+  <button class="s" id="fitBtn">Full size</button>
   <button class="s" id="prt">Print</button>
   <button class="r" id="rst">Reset</button>
 </div>
@@ -147,12 +153,18 @@ function upd(w,b){
  else{setc(w,'per',b.per);setc(w,'pay',fmt(num(b.amt)+xs(b)))}
 }
 var L=document.getElementById('list');
+var fit=true;
+function applyFit(){var a=L.clientWidth,c=1,z=1;
+ if(fit){c=a>=1000?2:1;z=Math.min(1,(a-(c-1)*18-4)/(c*780))}
+ L.style.setProperty('--c',c);L.style.setProperty('--z',z)}
+window.addEventListener('resize',applyFit);
 function render(){
  L.innerHTML=bills.map(function(b,i){
   var nm={m:'Bank slip',p:'Party slip',g:'Petrol slip'}[b.t];
   return '<div class="wrap" data-i="'+i+'"><div class="tools no-pdf">'+(b.t==='m'?'<button class="s" data-act="addrow">+ Row</button>':'')+
-  '<button class="s" data-act="addx">+ Add Line</button>'+(b.hid&&b.hid.length?'<button class="s" data-act="restore">Restore deleted lines</button>':'')+'<button class="g" data-act="copy">Duplicate</button><button class="s" data-act="scopy">Slip Copy</button></div><div class="scroll">'+card(b)+'</div></div>'}).join('');
+  '<button class="s" data-act="addx">+ Add Line</button>'+(b.hid&&b.hid.length?'<button class="s" data-act="restore">Restore deleted lines</button>':'')+'<button class="g" data-act="copy">Duplicate</button><button class="s" data-act="scopy">Slip Copy</button><button class="r" data-act="del">Delete Slip</button></div><div class="scroll">'+card(b)+'</div></div>'}).join('');
  Array.prototype.forEach.call(L.children,function(w,i){upd(w,bills[i])});
+ applyFit();
 }
 function bi(el){return +el.closest('.wrap').dataset.i}
 L.addEventListener('input',function(e){
@@ -175,6 +187,7 @@ L.addEventListener('click',function(e){
  else if(act==='pdf'){makePDF([i]);return}
  save();render();
 });
+document.getElementById('fitBtn').onclick=function(){fit=!fit;this.textContent=fit?'Full size':'Fit on page';applyFit()};
 document.getElementById('prt').onclick=function(){window.print()};
 document.getElementById('rst').onclick=function(){if(confirm('Reset everything to the original 4 slips?')){bills=start();save();render()}};
 async function makePDF(idx){
@@ -222,7 +235,7 @@ document.getElementById('gGo').onclick=function(){
  if(t==='m'){o.rows=[{v:v.v||'',p:v.p||'',gp:v.gp||'',nw:v.nw||'',pw:v.pw||v.nw||'',rate:v.rate||''}];
   ['bank','date','name','iban','pl'].forEach(function(k){o[k]=v[k]||''});o.prev=v.prev||'0';o.adv=v.adv||'0';o.al='Advance Payment'}
  else Object.keys(o).forEach(function(k){if(k!=='t')o[k]=v[k]||((k==='ded'||k==='amt')?'0':'')});
- bills.push(o);save();render();G.hidden=true;L.lastElementChild.scrollIntoView({behavior:'smooth'});
+ bills.push(o);save();render();G.hidden=true;L.lastElementChild.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
 };
 render();
 </script>
