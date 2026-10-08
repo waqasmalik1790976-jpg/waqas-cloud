@@ -92,6 +92,7 @@ th.am{text-align:right;padding-right:28px}td.am{padding-right:28px!important;whi
 .q td input.r{text-align:center}
 .p .pd{justify-content:center}.p .pd input.dc{width:100%;text-align:center;font-size:19px}
 .sm .tot{white-space:nowrap;gap:16px}
+.mt{table-layout:fixed}.mt td input,.mt th{min-width:0}body.cap .mt col.xc{display:none}
 body.cap .no-pdf,body.cap .z{display:none!important}
 @media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
@@ -119,7 +120,7 @@ var KEY='payment-slips-v1';
 var DEF={
  m:function(){return{t:'m',bank:'Meezan Bank Bhalwal',date:'7-Oct-26',name:'Muhammad Rizwan',iban:'PK32 MEZN 0098 4501 0347 0976',rows:[{v:'E-2968',p:'Gutka',gp:'12',nw:'265.375',pw:'265.375',rate:'610'}],pl:'Previous Balance 6-10-2026',prev:'1931699',al:'Advance Payment',adv:'800000'}},
  p:function(){return{t:'p',title:'Mashallah RM Party Bill Required',d1:'21-Sep-26 To 30-Sep-26',d2:'',nw:'49.875',rate:'2000',dl:'Agreement Deduction',ded:'5000',at:'Ghulam Shabeer',an:'PK32BPUN6020305201800011',bk:'Bank Of Punjab'}},
- g:function(){return{t:'g',title:'Al Wali Petroleum',per:'',bank:'UBL Bank',name:'Arif Iqbal',iban:'PK26 UNIL 0112 0982 3710 3348',amt:'550741'}}
+ g:function(){return{t:'g',title:'Al Wali Petroleum',desc:'',per:'',bank:'UBL Bank',name:'Arif Iqbal',iban:'PK26 UNIL 0112 0982 3710 3348',amt:'550741'}}
 };
 function start(){var a=DEF.p();a.title='Abbas RM Party Jalyki Bill Required';a.nw='82.875';a.ded='0';a.at='Abbas Ali';a.an='PK69ABPA0010060496100013';a.bk='Allied Bank';return[DEF.m(),DEF.p(),a,DEF.g()]}
 var bills;try{bills=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){bills=null}
@@ -157,7 +158,7 @@ function card(b){
   var rows=b.rows.map(function(r,j){return '<tr data-r="'+j+'">'+['v','p','gp','nw','pw','rate'].map(function(k){return '<td><input data-k="'+k+'" value="'+esc(r[k])+'"></td>'}).join('')+'<td class="am" data-c="ra"></td><td class="x no-pdf"><button data-act="delrow" title="Delete this row">×</button></td></tr>'}).join('');
   return '<div class="card m"><div class="hd">'+I(b,'bank','bank')+'<div><div class="dl">Date</div>'+I(b,'date','date r')+'</div></div>'+
   '<div class="ac"><small>Account Details</small>'+LN(b,'name','lr',I(b,'name','nm'))+LN(b,'iban','lr',I(b,'iban','ib'))+'</div>'+
-  '<table><tr><th>Vehicle</th><th>Product</th><th>GP</th><th>N/W (M)</th><th>P/W (M)</th><th>Rate</th><th class="am">Amount</th><th class="no-pdf"></th></tr>'+rows+'</table>'+
+  '<table class="mt"><colgroup><col style="width:13.7%"><col style="width:14.9%"><col style="width:5.8%"><col style="width:17%"><col style="width:16.2%"><col style="width:8.9%"><col style="width:17.5%"><col class="xc" style="width:6%"></colgroup><tr><th>Vehicle</th><th>Product</th><th>GP</th><th>N/W (M)</th><th>P/W (M)</th><th>Rate</th><th class="am">Amount</th><th class="no-pdf"></th></tr>'+rows+'</table>'+
   '<div class="sm"><div class="in">'+LN(b,'sum','ln','<span class="sl">Amount</span><span class="sv" data-c="sum"></span>')+
   LN(b,'prev','ln',I(b,'pl','lb')+I(b,'prev','v r',1))+LN(b,'adv','ln',I(b,'al','lb')+I(b,'adv','v r',1))+
   XL(b,'ln')+'<div class="tot"><span>Total Payable Balance</span><span data-c="tot"></span></div></div></div></div>';
@@ -172,7 +173,7 @@ function card(b){
  var ga=LN(b,'name','lr',I(b,'name','n1'))+LN(b,'bank','lr',I(b,'bank','n2'))+LN(b,'iban','lr',I(b,'iban','n3'));
  return '<div class="card q"><div class="gh">'+I(b,'title','gt')+'</div>'+
   (ga?'<div class="ga"><small>Account Details</small>'+ga+'</div>':'')+
-  '<table><tr><th>Description</th><th>Period</th><th>Amount</th></tr><tr><td>Bill Payment</td><td>'+I(b,'per')+'</td><td><input data-k="amt" data-n="1" class="r" value="'+esc(fmt(num(b.amt)))+'"></td></tr></table>'+
+  '<table><tr><th>Description</th><th>Period</th><th>Amount</th></tr><tr><td>'+I(b,'desc')+'</td><td>'+I(b,'per')+'</td><td><input data-k="amt" data-n="1" class="r" value="'+esc(fmt(num(b.amt)))+'"></td></tr></table>'+
   '<div class="sm"><div class="in">'+XL(b,'ln')+'<div class="tot"><span>Payable Balance</span><span data-c="pay"></span></div></div></div></div>';
 }
 function setc(w,n,v){var e=w.querySelector('[data-c="'+n+'"]');if(e)e.textContent=v}
@@ -254,7 +255,7 @@ async function slipCopy(i,btn){
 var FLD={
  m:[['bank','Bank name'],['date','Date'],['name','Account holder name'],['iban','Account / IBAN no.'],['v','Vehicle'],['p','Product'],['gp','GP'],['nw','N/W (M)'],['pw','P/W (M)'],['rate','Rate'],['pl','Previous balance label'],['prev','Previous balance amount'],['adv','Advance payment']],
  p:[['title','Slip title (e.g. Ali RM Party Bill Required)'],['d1','Dates (e.g. 21-Sep-26 To 30-Sep-26)'],['nw','N/W (M)'],['rate','Rate/M'],['dl','Deduction label'],['ded','Deduction amount'],['at','Account title'],['an','Account no.'],['bk','Bank']],
- g:[['title','Party / company name'],['per','Bill period (e.g. 1-09-26 To 20-09-26)'],['bank','Bank'],['name','Account name'],['iban','Account no.'],['amt','Bill payment amount']]};
+ g:[['title','Party / company name'],['desc','Description'],['per','Period (e.g. 1-09-26 To 20-09-26)'],['bank','Bank'],['name','Account name'],['iban','Account no.'],['amt','Bill payment amount']]};
 function today(){var d=new Date(),m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return d.getDate()+'-'+m[d.getMonth()]+'-'+String(d.getFullYear()).slice(2)}
 function buildForm(){
  var PRE={date:today(),d1:today(),pl:'Previous Balance',dl:'Agreement Deduction'};
