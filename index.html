@@ -68,6 +68,10 @@ td.x button{background:#e3e7f5;color:#c0392b;padding:2px 8px}
 .gen input,.gen select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;font:inherit;background:var(--bg);color:var(--tx);margin-top:3px}
 .gen .ar{display:flex;gap:8px;flex-wrap:wrap}
 .dupr{display:flex;gap:8px;margin-top:8px}.dupr button{flex:1;padding:11px;font-size:16px}
+.lx{flex:none;margin-left:8px;background:#fde8e6;color:#c0392b;padding:0 8px;font-size:16px;line-height:22px;border-radius:6px}.lr{display:flex;align-items:center}.lr input{flex:1;width:auto!important}.ln .lb{width:56%}.ln .v{width:34%}
+.p .xr{display:flex;align-items:center;background:#fff;border-radius:16px;padding:10px 20px;margin-top:12px;font-size:20px;font-weight:700;color:#1f2d4d}
+.xr .lb{flex:1;font-size:20px;font-weight:700}.xr .v{width:30%;font-size:20px;font-weight:700}.ln .lb{min-width:0}
+.sg{flex:none;background:#dfe4f5;color:#1b2a6b;padding:0 10px;font-size:16px;line-height:22px;border-radius:6px;margin:0 6px}.sp{font-weight:700;margin-right:2px}
 body.cap .no-pdf,body.cap .z{display:none!important}
 @media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
@@ -105,44 +109,54 @@ function fmt(n){return Math.round(n).toLocaleString('en-US')}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
 function I(b,k,cls,n){return '<input data-k="'+k+'"'+(n?' data-n="1"':'')+(cls?' class="'+cls+'"':'')+' value="'+esc(n?fmt(num(b[k])):b[k])+'">'}
 function ramt(r){return Math.round(num(r.pw||r.nw)*num(r.rate))}
+function hid(b,k){return (b.hid||[]).indexOf(k)>-1}
+function eff(b,k){return hid(b,k)?0:num(b[k])}
+function X(){return '<button class="lx no-pdf" data-act="hline" title="Delete this line">×</button>'}
+function LN(b,k,cls,inner){return hid(b,k)?'':'<div class="'+cls+'" data-line="'+k+'">'+inner+X()+'</div>'}
+function xs(b){return (b.extra||[]).reduce(function(t,x){return t+(x.m==='+'?1:x.m==='-'?-1:0)*num(x.a)},0)}
+function XL(b,cls){return (b.extra||[]).map(function(x,j){var sg=x.m==='+'?'+':x.m==='-'?'\u2212':'\u2022';
+ return '<div class="'+cls+'" data-xi="'+j+'"><input data-xk="l" class="lb" placeholder="Line name" value="'+esc(x.l)+'"><button class="sg no-pdf" data-act="xsign" title="Add / Deduct / Note only">'+sg+'</button><span class="sp">'+(x.m==='0'?'':sg)+'</span><input data-xk="a" data-n="1" class="v r" value="'+esc(fmt(num(x.a)))+'"><button class="lx no-pdf" data-act="xdel" title="Delete this line">\u00d7</button></div>'}).join('')}
 function card(b){
  if(b.t==='m'){
-  var rows=b.rows.map(function(r,j){return '<tr data-r="'+j+'">'+['v','p','gp','nw','pw','rate'].map(function(k){return '<td><input data-k="'+k+'" value="'+esc(r[k])+'"></td>'}).join('')+'<td class="am" data-c="ra"></td><td class="x no-pdf"><button data-act="delrow">×</button></td></tr>'}).join('');
+  var rows=b.rows.map(function(r,j){return '<tr data-r="'+j+'">'+['v','p','gp','nw','pw','rate'].map(function(k){return '<td><input data-k="'+k+'" value="'+esc(r[k])+'"></td>'}).join('')+'<td class="am" data-c="ra"></td><td class="x no-pdf"><button data-act="delrow" title="Delete this row">×</button></td></tr>'}).join('');
   return '<div class="card m"><div class="hd">'+I(b,'bank','bank')+'<div><div class="dl">Date</div>'+I(b,'date','date r')+'</div></div>'+
-  '<div class="ac"><small>Account Details</small>'+I(b,'name','nm')+I(b,'iban','ib')+'</div>'+
+  '<div class="ac"><small>Account Details</small>'+LN(b,'name','lr',I(b,'name','nm'))+LN(b,'iban','lr',I(b,'iban','ib'))+'</div>'+
   '<table><tr><th>Vehicle</th><th>Product</th><th>GP</th><th>N/W (M)</th><th>P/W (M)</th><th>Rate</th><th>Amount</th><th class="no-pdf"></th></tr>'+rows+'</table>'+
-  '<div class="sm"><div class="in"><div class="ln"><span>Amount</span><span data-c="sum"></span></div>'+
-  '<div class="ln">'+I(b,'pl','lb')+I(b,'prev','v r',1)+'</div><div class="ln">'+I(b,'al','lb')+I(b,'adv','v r',1)+'</div>'+
-  '<div class="tot"><span>Total Payable Balance</span><span data-c="tot"></span></div></div></div></div>';
+  '<div class="sm"><div class="in">'+LN(b,'sum','ln','<span>Amount</span><span data-c="sum"></span>')+
+  LN(b,'prev','ln',I(b,'pl','lb')+I(b,'prev','v r',1))+LN(b,'adv','ln',I(b,'al','lb')+I(b,'adv','v r',1))+
+  XL(b,'ln')+'<div class="tot"><span>Total Payable Balance</span><span data-c="tot"></span></div></div></div></div>';
  }
- if(b.t==='p')return '<div class="card p"><div class="ph">'+I(b,'title','pt')+'<div class="pd">'+I(b,'d1')+I(b,'d2','r')+'</div></div><div class="pb">'+
+ if(b.t==='p'){
+  var ab=LN(b,'at','ar','<b>Account Title</b>'+I(b,'at'))+LN(b,'an','ar','<b>Account No</b>'+I(b,'an'))+LN(b,'bk','ar','<b>Bank</b>'+I(b,'bk'));
+  return '<div class="card p"><div class="ph">'+I(b,'title','pt')+'<div class="pd">'+I(b,'d1')+I(b,'d2','r')+'</div></div><div class="pb">'+
   '<div class="st"><div><small>N/W (M)</small>'+I(b,'nw')+'</div><div><small>Rate/M</small>'+I(b,'rate')+'</div><div><small>Bill Payment</small><b data-c="bill"></b></div></div>'+
-  '<div class="dd">'+I(b,'dl')+I(b,'ded','r',1)+'</div><div class="py"><span>Payable Payment</span><span data-c="pay"></span></div>'+
-  '<div class="pill">PAYMENT ONLINE REQUIRED</div><div class="ab"><div><b>Account Title</b>'+I(b,'at')+'</div><div><b>Account No</b>'+I(b,'an')+'</div><div><b>Bank</b>'+I(b,'bk')+'</div></div>'+
-  '</div></div>';
+  LN(b,'ded','dd',I(b,'dl')+I(b,'ded','r',1))+XL(b,'xr')+'<div class="py"><span>Payable Payment</span><span data-c="pay"></span></div>'+
+  LN(b,'pill','pill','PAYMENT ONLINE REQUIRED')+(ab?'<div class="ab">'+ab+'</div>':'')+'</div></div>';
+ }
+ var ga=LN(b,'name','lr',I(b,'name','n1'))+LN(b,'bank','lr',I(b,'bank','n2'))+LN(b,'iban','lr',I(b,'iban','n3'));
  return '<div class="card q"><div class="gh">'+I(b,'title','gt')+'<div><small>Bill Period</small>'+I(b,'per','r')+'</div></div>'+
-  '<div class="ga"><small>Account Details</small>'+I(b,'name','n1')+I(b,'bank','n2')+I(b,'iban','n3')+'</div>'+
+  (ga?'<div class="ga"><small>Account Details</small>'+ga+'</div>':'')+
   '<table><tr><th>Description</th><th>Period</th><th>Amount</th></tr><tr><td>Bill Payment</td><td data-c="per"></td><td><input data-k="amt" data-n="1" class="r" value="'+esc(fmt(num(b.amt)))+'"></td></tr></table>'+
-  '<div class="sm"><div class="in"><div class="tot"><span>Payable Balance</span><span data-c="pay"></span></div></div></div></div>';
+  '<div class="sm"><div class="in">'+XL(b,'ln')+'<div class="tot"><span>Payable Balance</span><span data-c="pay"></span></div></div></div></div>';
 }
 function setc(w,n,v){var e=w.querySelector('[data-c="'+n+'"]');if(e)e.textContent=v}
 function upd(w,b){
  if(b.t==='m'){var a=0;w.querySelectorAll('tr[data-r]').forEach(function(tr){var m=ramt(b.rows[+tr.dataset.r]);a+=m;tr.querySelector('[data-c="ra"]').textContent=fmt(m)});
-  setc(w,'sum',fmt(a));setc(w,'tot',fmt(a+num(b.prev)-num(b.adv)))}
- else if(b.t==='p'){var bl=Math.round(num(b.nw)*num(b.rate));setc(w,'bill',fmt(bl));setc(w,'pay',fmt(bl-num(b.ded)));w.querySelector('.dd').classList.toggle('z',num(b.ded)===0)}
- else{setc(w,'per',b.per);setc(w,'pay',fmt(num(b.amt)))}
+  setc(w,'sum',fmt(a));setc(w,'tot',fmt(a+eff(b,'prev')-eff(b,'adv')+xs(b)))}
+ else if(b.t==='p'){var bl=Math.round(num(b.nw)*num(b.rate));setc(w,'bill',fmt(bl));setc(w,'pay',fmt(bl-eff(b,'ded')+xs(b)));var dd=w.querySelector('.dd');if(dd)dd.classList.toggle('z',num(b.ded)===0)}
+ else{setc(w,'per',b.per);setc(w,'pay',fmt(num(b.amt)+xs(b)))}
 }
 var L=document.getElementById('list');
 function render(){
  L.innerHTML=bills.map(function(b,i){
   var nm={m:'Bank slip',p:'Party slip',g:'Petrol slip'}[b.t];
   return '<div class="wrap" data-i="'+i+'"><div class="tools no-pdf">'+(b.t==='m'?'<button class="s" data-act="addrow">+ Row</button>':'')+
-  '<button class="g" data-act="copy">Duplicate</button><button class="s" data-act="scopy">Slip Copy</button></div><div class="scroll">'+card(b)+'</div></div>'}).join('');
+  '<button class="s" data-act="addx">+ Add Line</button>'+(b.hid&&b.hid.length?'<button class="s" data-act="restore">Restore deleted lines</button>':'')+'<button class="g" data-act="copy">Duplicate</button><button class="s" data-act="scopy">Slip Copy</button></div><div class="scroll">'+card(b)+'</div></div>'}).join('');
  Array.prototype.forEach.call(L.children,function(w,i){upd(w,bills[i])});
 }
 function bi(el){return +el.closest('.wrap').dataset.i}
 L.addEventListener('input',function(e){
- var el=e.target,k=el.dataset.k;if(!k)return;var w=el.closest('.wrap'),b=bills[bi(el)],tr=el.closest('tr[data-r]');
+ var el=e.target,k=el.dataset.k;if(el.dataset.xk){var xb=bills[bi(el)];xb.extra[+el.closest('[data-xi]').dataset.xi][el.dataset.xk]=el.value;upd(el.closest('.wrap'),xb);save();return}if(!k)return;var w=el.closest('.wrap'),b=bills[bi(el)],tr=el.closest('tr[data-r]');
  if(tr)b.rows[+tr.dataset.r][k]=el.value;else b[k]=el.value;upd(w,b);save();
 });
 L.addEventListener('change',function(e){var el=e.target;if(el.dataset.n)el.value=fmt(num(el.value))});
@@ -151,6 +165,11 @@ L.addEventListener('click',function(e){
  if(act==='addrow'){var l=b.rows[b.rows.length-1]||{};b.rows.push({v:'',p:l.p||'Gutka',gp:'',nw:'',pw:'',rate:l.rate||''})}
  else if(act==='delrow'){if(b.rows.length>1)b.rows.splice(+e.target.closest('tr').dataset.r,1)}
  else if(act==='copy'){bills.splice(i+1,0,JSON.parse(JSON.stringify(b)))}
+ else if(act==='hline'){(b.hid=b.hid||[]).push(e.target.closest('[data-line]').dataset.line)}
+ else if(act==='restore'){b.hid=[]}
+ else if(act==='addx'){(b.extra=b.extra||[]).push({l:'',a:'',m:'+'})}
+ else if(act==='xsign'){var x=b.extra[+e.target.closest('[data-xi]').dataset.xi];x.m=x.m==='+'?'-':x.m==='-'?'0':'+'}
+ else if(act==='xdel'){b.extra.splice(+e.target.closest('[data-xi]').dataset.xi,1)}
  else if(act==='scopy'){slipCopy(i);return}
  else if(act==='del'){if(!confirm('Delete this slip?'))return;bills.splice(i,1)}
  else if(act==='pdf'){makePDF([i]);return}
