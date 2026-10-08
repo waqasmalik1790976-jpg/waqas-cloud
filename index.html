@@ -40,9 +40,9 @@ td.x button{background:#e3e7f5;color:#c0392b;padding:2px 8px}
 .ln input{font-size:19px;font-weight:600}.ln .lb{color:#6a73a3;width:62%}.ln .v{width:36%;color:#1b2a6b}
 .tot{margin-top:14px;background:var(--a,#1c2b6b);color:var(--tg,#ffe08a);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;font-size:25px;font-weight:700}
 /* party slip */
-.p{background:linear-gradient(135deg,#d7efec,#e6eef6 50%,#cfe3f4);border-radius:40px;padding:0 0 22px}
-.p .ph{background:var(--a,#169c93);color:var(--t,#fff);padding:26px 30px 16px;line-height:1.15}
-.p .pt{display:block;width:100%;text-align:center;font-size:30px;font-weight:700}
+.p{position:relative;background:linear-gradient(135deg,#d7efec,#e6eef6 50%,#cfe3f4);border-radius:40px;padding:0 0 22px;overflow:hidden;box-sizing:border-box}.p:before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:#c9a227;border-radius:40px 40px 0 0;z-index:3}.p .ph{border-radius:30px 30px 0 0}
+.p .ph{background:var(--a,#169c93);color:var(--t,#fff);padding:30px 30px 20px;line-height:1.25;min-height:0;box-sizing:border-box;overflow:visible}
+.p .pt{display:block;width:100%;text-align:center;font-size:29px;font-weight:700;line-height:1.25;padding:3px 4px 4px;box-sizing:border-box;overflow:visible;white-space:normal;word-break:normal}
 .p .pd{display:flex;justify-content:space-between;margin-top:12px;font-weight:700}.p .pd input{font-size:17px;font-weight:700;width:48%}
 .p .pb{padding:18px 34px 0}
 .p .st{display:flex;background:#fff;border-radius:18px;padding:12px 0;text-align:center}
@@ -94,8 +94,8 @@ th.am{text-align:right;padding-right:28px}td.am{padding-right:28px!important;whi
 .sm .tot{white-space:nowrap;gap:16px}
 .mt{table-layout:fixed}.mt td input,.mt th{min-width:0}body.cap .mt col.xc{display:none}
 body.cap .card{overflow:visible}
-body.cap .p .ph{padding-top:30px}
-body.cap .p .pt{line-height:1.15}
+body.cap .p .ph{padding-top:38px;padding-bottom:20px}
+body.cap .p .pt{line-height:1.28;padding-top:2px;overflow:visible}
 body.cap .no-pdf,body.cap .z{display:none!important}
 @media print{.top,.tools{display:none}body{background:#fff}.scroll{overflow:visible}}
 </style>
@@ -241,14 +241,14 @@ async function makePDF(idx){
  }catch(err){alert('PDF error. Use Print and choose Save as PDF.')}
  document.body.classList.remove('cap');
 }
-function withBg(cv){var W=1350,p=42,iw=W-2*p,ih=Math.round(cv.height*iw/cv.width),o=document.createElement('canvas');o.width=W;o.height=ih+2*p;
+function withBg(cv){var W=1150,p=34,iw=W-2*p,ih=Math.round(cv.height*iw/cv.width),o=document.createElement('canvas');o.width=W;o.height=ih+2*p;
  var x=o.getContext('2d');x.fillStyle='#ebeef5';x.fillRect(0,0,o.width,o.height);x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cv,p,p,iw,ih);return o}
 function flash(b,t){if(!b)return;var o=b.textContent;b.textContent=t;setTimeout(function(){b.textContent=o},1500)}
 async function slipCopy(i,btn){
  if(!window.html2canvas){alert('Library did not load.');return}
  document.body.classList.add('cap');
  try{
-  var cv=await html2canvas(L.children[i].querySelector('.card'),{scale:1.75,backgroundColor:null,onclone:function(d){d.querySelectorAll('.scroll').forEach(function(x){x.style.overflow='visible'});d.querySelectorAll('.card').forEach(function(x){x.style.overflow='visible';x.style.marginTop='6px'})}});
+  var cv=await html2canvas(L.children[i].querySelector('.card'),{scale:1.75,backgroundColor:null,onclone:function(d){d.querySelectorAll('.scroll').forEach(function(x){x.style.overflow='visible'});d.querySelectorAll('.card').forEach(function(x){x.style.overflow='visible';x.style.marginTop='10px';x.style.paddingTop='2px'})}});
   cv=withBg(cv);var blob=await new Promise(function(r){cv.toBlob(r,'image/png')});
   try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);flash(btn,'\u2713 Copied')}
   catch(e){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='slip-'+(i+1)+'.png';a.click();flash(btn,'\u2713 Saved')}
